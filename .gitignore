@@ -2,8 +2,6 @@ __pycache__/
 # Local clinician accounts (usernames + password hashes) - never commit.
 config/clinicians.json
 
-
-
 # Local Claude Code skills - not shared in git.
 .claude/skills/
 CLAUDE.md
