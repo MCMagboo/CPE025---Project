@@ -1,4 +1,5 @@
 __pycache__/
+design/export_svg.py
 # Local clinician accounts (usernames + password hashes) - never commit.
 config/clinicians.json
 
