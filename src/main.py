@@ -1,18 +1,22 @@
 """OrthoScan AI - clinical desktop UI shell.
 
 A clinician signs in first (see login.py), then the three-column workspace
-opens. A printed X-ray can be captured with a webcam (see camera.py). The AI
-backend (tooth detection, spacing analysis, displacement grading) is not
-implemented yet; the remaining workspace button handlers are stubs.
+opens. An X-ray comes in from a PNG/JPEG/DICOM file (see ingestion.py) or a
+webcam photo of a print (see camera.py). The AI backend (tooth detection,
+spacing analysis, displacement grading) is not implemented yet; the remaining
+workspace button handlers are stubs.
 """
 
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from tkinter import filedialog
 
 import customtkinter as ctk
 from PIL import Image, ImageDraw, ImageOps
 
 from auth import ClinicianStore
 from camera import CameraStream, camera_name, list_cameras
+from ingestion import FILE_TYPES, XrayLoadError, load_xray
 from login import LoginView
 from theme import (
     ACCENT,
@@ -23,6 +27,7 @@ from theme import (
     BG_SIDEBAR,
     BG_SURFACE,
     BORDER,
+    DANGER,
     FONT_FAMILY,
     PENDING,
     SUCCESS,
@@ -34,6 +39,8 @@ from theme import (
 SEVERITY_TIERS = ["Perfect", "Mild", "Moderate", "Severe", "Very Severe"]
 
 DROP_PROMPT = "Upload a 2D panoramic X-ray (DICOM, PNG, or JPEG) to begin."
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 CAMERA_POLL_MS = 33  # ~30 fps live preview
 NO_CAMERA_MESSAGE = (
@@ -74,6 +81,11 @@ class App(ctk.CTk):
         # The X-ray currently on the canvas (PIL image, memory only - never saved here).
         self.current_image = None
 
+        # File upload: decoding runs on a worker thread so big DICOMs don't freeze the UI.
+        self._upload_executor = ThreadPoolExecutor(max_workers=1)
+        self._upload_dir = DATA_DIR if DATA_DIR.is_dir() else Path.home()
+        self._uploading = False
+
         # Camera capture state. camera_mode is None, "live" or "review".
         self.camera = None
         self.camera_mode = None
@@ -104,6 +116,7 @@ class App(ctk.CTk):
     def on_sign_out(self):
         self._close_camera()
         self.current_image = None
+        self._uploading = False  # any upload still loading is dropped by _poll_upload
         if self._resize_job is not None:
             self.after_cancel(self._resize_job)
             self._resize_job = None
@@ -197,12 +210,28 @@ class App(ctk.CTk):
         self.canvas_frame.grid_columnconfigure(0, weight=1)
         self.canvas_frame.grid_rowconfigure(1, weight=1)
 
+        header = ctk.CTkFrame(self.canvas_frame, fg_color="transparent")
+        header.grid(row=0, column=0, padx=20, pady=(16, 8), sticky="ew")
+        header.grid_columnconfigure(1, weight=1)
+
         ctk.CTkLabel(
-            self.canvas_frame,
+            header,
             text="Diagnostic Canvas",
             font=ctk.CTkFont(family=FONT_FAMILY, size=16, weight="bold"),
             text_color=TEXT_PRIMARY,
-        ).grid(row=0, column=0, padx=20, pady=(16, 8), sticky="w")
+        ).grid(row=0, column=0, sticky="w")
+
+        # Where the X-ray on the canvas came from, or what went wrong loading one.
+        self.canvas_source_label = ctk.CTkLabel(
+            header,
+            text="",
+            font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+            text_color=TEXT_MUTED,
+            wraplength=380,
+            justify="right",
+            anchor="e",
+        )
+        self.canvas_source_label.grid(row=0, column=1, padx=(16, 0), sticky="e")
 
         self.image_label = ctk.CTkLabel(
             self.canvas_frame,
@@ -580,20 +609,74 @@ class App(ctk.CTk):
     def _use_photo(self):
         # Kept in memory only; saving stays behind clinician verification.
         self.current_image = self.captured_image
+        width, height = self.current_image.size
+        self._set_canvas_source(f"Camera photo — {width} × {height}")
         self._close_camera()
 
     def _on_close(self):
         self._close_camera(wait=True)
         self._probe_executor.shutdown(wait=False, cancel_futures=True)
+        self._upload_executor.shutdown(wait=False, cancel_futures=True)
         self.destroy()
 
-    # --- Button handlers (stubs until the backend exists) --------------------
+    # --- File upload -----------------------------------------------------------
     def on_upload(self):
-        pass
+        if self._uploading:
+            return
+        path = filedialog.askopenfilename(
+            parent=self,
+            title="Upload X-ray",
+            initialdir=str(self._upload_dir),
+            filetypes=FILE_TYPES,
+        )
+        if not path:
+            return  # picker cancelled
+        path = Path(path)
+        self._upload_dir = path.parent
+        self._uploading = True
+        self.sidebar_buttons["Upload X-Ray"].configure(state="disabled")
+        self._set_canvas_source(f"Opening {path.name}…")
+        future = self._upload_executor.submit(load_xray, path)
+        self._poll_upload(future, path, self.canvas_frame)
 
+    def _poll_upload(self, future, path, canvas_frame):
+        """Check the worker from the UI thread; Tk widgets must only be touched here."""
+        if not future.done():
+            self.after(50, self._poll_upload, future, path, canvas_frame)
+            return
+        if canvas_frame is not self.canvas_frame:
+            return  # signed out (and maybe back in) while loading: drop the result
+        self._uploading = False
+        self.sidebar_buttons["Upload X-Ray"].configure(state="normal")
+
+        try:
+            image = future.result()
+        except XrayLoadError as exc:
+            # Keep whatever X-ray is already on the canvas.
+            self._set_canvas_source(str(exc), error=True)
+            return
+        except Exception:  # noqa: BLE001 - never leave the UI stuck on "Opening…"
+            self._set_canvas_source(
+                f"Couldn't open {path.name}: something unexpected went wrong.", error=True
+            )
+            raise
+
+        self._close_camera()
+        self.current_image = image
+        width, height = image.size
+        self._set_canvas_source(f"{path.name} — {width} × {height}")
+        self._render_canvas()
+
+    def _set_canvas_source(self, text, error=False):
+        self.canvas_source_label.configure(
+            text=text, text_color=DANGER if error else TEXT_MUTED
+        )
+
+    # --- Button handlers (stubs until the backend exists) --------------------
     def on_clear(self):
         self._close_camera()
         self.current_image = None
+        self._set_canvas_source("")
         self._render_canvas()
 
     def on_export(self):

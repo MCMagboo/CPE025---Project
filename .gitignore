@@ -1,8 +1,11 @@
-__pycache__/
-design/export_svg.py
 # Local clinician accounts (usernames + password hashes) - never commit.
 config/clinicians.json
 
 # Local Claude Code skills - not shared in git.
 .claude/skills/
 CLAUDE.md
+
+# Unecessary files
+__pycache__/
+design/export_svg.py
+src/orthoscan-ai.code-workspace
