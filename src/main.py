@@ -11,10 +11,11 @@ Export is still a stub, so nothing is saved.
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
+import tkinter
 from tkinter import filedialog
 
 import customtkinter as ctk
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageColor, ImageDraw, ImageFont, ImageOps
 
 from analysis import LOWER_ARCH, UPPER_ARCH
 from auth import ClinicianStore
@@ -38,14 +39,20 @@ from theme import (
     SUCCESS_HOVER,
     TEXT_MUTED,
     TEXT_PRIMARY,
+    CROWDING_BOX,
+    SPACING_BOX,
     TOOTH_BOX,
 )
 
+# (finding key, title, subtitle, colour of this finding's boxes on the X-ray).
+# Clicking a card highlights its finding's boxes; the others fade to DIMMED_ALPHA.
 ASSESSMENT_CARDS = [
-    ("FDI Tooth Detection", "Tooth numbering (FDI notation)"),
-    ("Spacing & Overcrowding", "From tooth numbering: extra or missing teeth"),
-    ("Impacted Tooth", "Impacted tooth detection"),
+    ("fdi", "FDI Tooth Detection", "Tooth numbering (FDI notation)", TOOTH_BOX),
+    ("spacing", "Spacing", "Missing teeth or spaces, from tooth numbering", SPACING_BOX),
+    ("crowding", "Overcrowding", "Extra teeth, from tooth numbering", CROWDING_BOX),
+    ("impacted", "Impacted Tooth", "Impacted tooth detection", DANGER),
 ]
+DIMMED_ALPHA = 60  # ~25% opacity for boxes of findings that aren't highlighted
 MAX_SPACING_LINES = 3
 
 DROP_PROMPT = "Upload a 2D panoramic X-ray (DICOM, PNG, or JPEG) to begin."
@@ -86,6 +93,7 @@ class App(ctk.CTk):
         self._canvas_size = None
         self.placeholder_image = None
         self.canvas_image = None
+        self._fitted_cache = None  # (source image, canvas size, resized copy)
         self.clinician = None
 
         # The X-ray currently on the canvas (PIL image, memory only - never saved here).
@@ -117,6 +125,7 @@ class App(ctk.CTk):
         self.approved_at = None
         self._analysis_token = 0  # bumped on every new image/clear/sign-out
         self._analysis_error = None
+        self.highlighted = set()  # finding keys to highlight on the X-ray; empty = all
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._show_login()
@@ -232,7 +241,7 @@ class App(ctk.CTk):
         self.canvas_frame = ctk.CTkFrame(self, fg_color=BG_SURFACE, corner_radius=14)
         self.canvas_frame.grid(row=0, column=1, sticky="nsew", padx=16, pady=16)
         self.canvas_frame.grid_columnconfigure(0, weight=1)
-        self.canvas_frame.grid_rowconfigure(1, weight=1)
+        self.canvas_frame.grid_rowconfigure(2, weight=1)  # the X-ray area
 
         header = ctk.CTkFrame(self.canvas_frame, fg_color="transparent")
         header.grid(row=0, column=0, padx=20, pady=(16, 8), sticky="ew")
@@ -257,9 +266,38 @@ class App(ctk.CTk):
         )
         self.canvas_source_label.grid(row=0, column=1, padx=(16, 0), sticky="e")
 
-        # Shown once AI results exist; hides the boxes to see the bare X-ray.
+        # Overlay controls, shown once AI results exist: which findings to highlight
+        # (cards on the right toggle them; this chip resets to all) and the on/off switch.
+        bar = self.overlay_bar = ctk.CTkFrame(self.canvas_frame, fg_color="transparent")
+        bar.grid(row=1, column=0, padx=20, pady=(0, 8), sticky="ew")
+        bar.grid_columnconfigure(1, weight=1)
+
+        self.all_findings_chip = ctk.CTkButton(
+            bar,
+            text="All findings",
+            command=self._clear_highlight,
+            width=96,
+            height=26,
+            corner_radius=13,
+            font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"),
+            fg_color=ACCENT,
+            hover_color=ACCENT_HOVER,
+            border_color=BORDER,
+        )
+        self.all_findings_chip.grid(row=0, column=0, sticky="w")
+
+        ctk.CTkLabel(
+            bar,
+            text="Click a finding on the right to focus on it",
+            font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+            text_color=TEXT_MUTED,
+            anchor="w",
+            height=20,
+        ).grid(row=0, column=1, padx=10, sticky="w")
+
+        # Hides all boxes to see the bare X-ray.
         self.overlay_switch = ctk.CTkSwitch(
-            header,
+            bar,
             text="AI overlay",
             command=self._render_canvas,
             font=ctk.CTkFont(family=FONT_FAMILY, size=12),
@@ -269,8 +307,8 @@ class App(ctk.CTk):
             switch_height=16,
         )
         self.overlay_switch.select()
-        self.overlay_switch.grid(row=0, column=2, padx=(16, 0), sticky="e")
-        self.overlay_switch.grid_remove()
+        self.overlay_switch.grid(row=0, column=2, sticky="e")
+        bar.grid_remove()
 
         self.image_label = ctk.CTkLabel(
             self.canvas_frame,
@@ -279,7 +317,7 @@ class App(ctk.CTk):
             text_color=TEXT_MUTED,
             compound="center",
         )
-        self.image_label.grid(row=1, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        self.image_label.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="nsew")
 
         # Redraw whatever the canvas shows whenever its area changes size.
         self.image_label.bind("<Configure>", self._schedule_canvas_render)
@@ -289,7 +327,7 @@ class App(ctk.CTk):
     def _build_camera_controls(self):
         """Row under the canvas, shown only while capturing from a camera."""
         controls = self.camera_controls = ctk.CTkFrame(self.canvas_frame, fg_color="transparent")
-        controls.grid(row=2, column=0, padx=20, pady=(0, 16), sticky="ew")
+        controls.grid(row=3, column=0, padx=20, pady=(0, 16), sticky="ew")
         controls.grid_columnconfigure(1, weight=1)
 
         self.camera_menu = ctk.CTkOptionMenu(
@@ -385,7 +423,11 @@ class App(ctk.CTk):
             self._show_on_canvas(self.captured_image)
         elif self.current_image is not None:
             show_overlay = self.analysis is not None and self.overlay_switch.get() == 1
-            self._show_on_canvas(self.current_image, analysis=self.analysis if show_overlay else None)
+            self._show_on_canvas(
+                self.current_image,
+                analysis=self.analysis if show_overlay else None,
+                highlighted=self.highlighted,
+            )
         else:
             self._render_placeholder(*self._canvas_size)
 
@@ -394,10 +436,11 @@ class App(ctk.CTk):
         scale = self.image_label._get_widget_scaling()
         return max(int(width / scale), 50), max(int(height / scale), 50)
 
-    def _show_on_canvas(self, image, guide=False, analysis=None):
+    def _show_on_canvas(self, image, guide=False, analysis=None, highlighted=frozenset()):
         """Fit `image` into the canvas without stretching, on the drop-zone background.
 
-        With `analysis`, AI boxes are drawn on the fitted copy (never on `image`).
+        With `analysis`, AI boxes are drawn on the fitted copy (never on `image`);
+        findings not in `highlighted` are faded (an empty set highlights all).
         """
         w, h = self._canvas_logical_size(*self._canvas_size)
         # Always fill the whole label so its size (and the layout) never shifts.
@@ -405,12 +448,21 @@ class App(ctk.CTk):
         ImageDraw.Draw(background).rounded_rectangle(
             [0, 0, w - 1, h - 1], radius=12, fill=BG_PLACEHOLDER
         )
-        fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
-        if guide:
+        if guide:  # live camera frame: new every time, never cached
+            fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
             _draw_framing_guide(fitted)
+        else:
+            # Reuse the resized X-ray when only the overlay changes (highlight clicks).
+            cached = self._fitted_cache
+            if cached and cached[0] is image and cached[1] == (w, h):
+                fitted = cached[2]
+            else:
+                fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
+                self._fitted_cache = (image, (w, h), fitted)
         if analysis is not None:
-            fitted = fitted.convert("RGB")
-            _draw_analysis_overlay(fitted, analysis, scale=fitted.width / image.width)
+            fitted = _draw_analysis_overlay(
+                fitted, analysis, scale=fitted.width / image.width, highlighted=highlighted
+            )
         background.paste(fitted, ((w - fitted.width) // 2, (h - fitted.height) // 2))
 
         self.canvas_image = ctk.CTkImage(light_image=background, dark_image=background, size=(w, h))
@@ -475,10 +527,18 @@ class App(ctk.CTk):
         self.status_labels = {}
         self.card_details = {}
         self.card_subtitles = []
-        for i, (title, subtitle) in enumerate(ASSESSMENT_CARDS, start=2):
-            card = self._build_card(panel, title, subtitle)
-            card.grid(row=i, column=0, padx=14, pady=6, sticky="ew")
-        self._build_fdi_chart(self.status_labels["FDI Tooth Detection"].master)
+        self.card_frames = {}
+        # What the cards currently show, so highlight updates only touch what changed.
+        self._cards_clickable = None
+        self._card_selected = {}
+        for i, (key, title, subtitle, swatch) in enumerate(ASSESSMENT_CARDS, start=2):
+            card = self._build_card(panel, title, subtitle, swatch)
+            card.grid(row=i, column=0, padx=14, pady=4, sticky="ew")
+            self.card_frames[key] = card
+        self._build_fdi_chart(self.card_frames["fdi"])
+        # Bind after the chart exists so every part of each card is clickable.
+        for key, card in self.card_frames.items():
+            _bind_click_tree(card, lambda _event, key=key: self._toggle_highlight(key))
 
         # Spacer pushes the verify button to the very bottom.
         bottom = len(ASSESSMENT_CARDS) + 2
@@ -512,19 +572,28 @@ class App(ctk.CTk):
         for number, cell in self.fdi_cells.items():
             cell.configure(text=number[1] if compact else number)
 
-    def _build_card(self, parent, title, subtitle):
+    def _build_card(self, parent, title, subtitle, swatch):
         card = ctk.CTkFrame(
             parent, fg_color=BG_CARD, corner_radius=10, border_width=1, border_color=BORDER
         )
         card.grid_columnconfigure(0, weight=1)
 
+        # Title with a swatch in the colour of this finding's boxes on the X-ray.
+        # Labels get small minimum heights (CTk's default is 28 px each), so four
+        # cards fit at 768 px tall; wrapped text still grows them as needed.
+        heading = ctk.CTkFrame(card, fg_color="transparent")
+        heading.grid(row=0, column=0, padx=14, pady=(10, 0), sticky="w")
+        ctk.CTkFrame(heading, width=10, height=10, corner_radius=2, fg_color=swatch).grid(
+            row=0, column=0, padx=(0, 7)
+        )
         ctk.CTkLabel(
-            card,
+            heading,
             text=title,
             font=ctk.CTkFont(family=FONT_FAMILY, size=14, weight="bold"),
             text_color=TEXT_PRIMARY,
             anchor="w",
-        ).grid(row=0, column=0, padx=14, pady=(12, 0), sticky="w")
+            height=20,
+        ).grid(row=0, column=1, sticky="w")
 
         subtitle_label = ctk.CTkLabel(
             card,
@@ -533,6 +602,7 @@ class App(ctk.CTk):
             text_color=TEXT_MUTED,
             anchor="w",
             justify="left",
+            height=16,
         )
         subtitle_label.grid(row=1, column=0, padx=14, pady=(0, 4), sticky="w")
         self.card_subtitles.append(subtitle_label)
@@ -545,8 +615,9 @@ class App(ctk.CTk):
             anchor="w",
             justify="left",
             wraplength=240,
+            height=18,
         )
-        status.grid(row=2, column=0, padx=14, pady=(0, 10), sticky="w")
+        status.grid(row=2, column=0, padx=14, pady=(0, 8), sticky="w")
         self.status_labels[title] = status
 
         # Row 3 is free for a card's own widget (the FDI chart).
@@ -558,8 +629,9 @@ class App(ctk.CTk):
             anchor="w",
             justify="left",
             wraplength=240,
+            height=16,
         )
-        details.grid(row=4, column=0, padx=14, pady=(0, 10), sticky="w")
+        details.grid(row=4, column=0, padx=14, pady=(0, 8), sticky="w")
         self.card_details[title] = details
         return card
 
@@ -628,7 +700,7 @@ class App(ctk.CTk):
                 card_status, color = "● Waiting for an X-ray", TEXT_MUTED
             else:
                 card_status, color = "● Analyzing…", PENDING
-            for title, _ in ASSESSMENT_CARDS:
+            for _, title, _, _ in ASSESSMENT_CARDS:
                 self._set_card(title, card_status, color)
             self._color_fdi_chart(None)
         else:
@@ -640,9 +712,54 @@ class App(ctk.CTk):
             text="Approved" if approved else "Verify & Approve",
         )
         if result is not None:
-            self.overlay_switch.grid()
+            self.overlay_bar.grid()
         else:
-            self.overlay_switch.grid_remove()
+            self.overlay_bar.grid_remove()
+        self._refresh_highlight_ui()
+
+    # --- Highlighting findings on the X-ray -------------------------------------
+    def _toggle_highlight(self, key):
+        """Card click: add/remove this finding from the highlighted set."""
+        if self.analysis is None:
+            return  # nothing on the X-ray to highlight yet
+        self.highlighted ^= {key}
+        self._refresh_highlight_ui()
+        self._render_canvas()
+
+    def _clear_highlight(self):
+        """"All findings" chip: back to every box at full colour."""
+        if not self.highlighted:
+            return
+        self.highlighted.clear()
+        self._refresh_highlight_ui()
+        self._render_canvas()
+
+    def _refresh_highlight_ui(self):
+        if self.clinician is None:
+            return
+        # Only touch widgets whose state changed: every CTk configure redraws rounded
+        # shapes, and re-applying the cursor to all card widgets made each click ~120 ms.
+        clickable = self.analysis is not None
+        if clickable != self._cards_clickable:
+            for card in self.card_frames.values():
+                _set_cursor_tree(card, "hand2" if clickable else "")
+            self._cards_clickable = clickable
+        for key, _, _, swatch in ASSESSMENT_CARDS:
+            selected = key in self.highlighted
+            if self._card_selected.get(key) == selected:
+                continue
+            self.card_frames[key].configure(
+                border_color=swatch if selected else BORDER, border_width=2 if selected else 1
+            )
+            self._card_selected[key] = selected
+        if self.highlighted:
+            self.all_findings_chip.configure(
+                fg_color="transparent", border_width=1, text_color=TEXT_PRIMARY, hover_color=BG_CARD
+            )
+        else:
+            self.all_findings_chip.configure(
+                fg_color=ACCENT, border_width=0, text_color="#FFFFFF", hover_color=ACCENT_HOVER
+            )
 
     def _show_results(self, result, color):
         spacing = result.spacing
@@ -652,25 +769,32 @@ class App(ctk.CTk):
         # Missing numbers are listed on the Spacing card; the chart shows them dimmed.
         self._set_card("FDI Tooth Detection", status, color)
 
-        parts = []
-        if spacing.has_overcrowding:
-            parts.append(
-                f"Possible overcrowding: {_plural(spacing.extra_teeth, 'extra tooth', 'extra teeth')}"
-            )
-        if spacing.missing:
-            parts.append(_plural(len(spacing.missing), "missing tooth or space", "missing teeth or spaces"))
-        lines = [
-            f"Extra tooth: {_plural(count, 'tooth', 'teeth')} numbered {number}"
-            for number, count in spacing.extra_numbers.items()
-        ]
+        lines = []
         if spacing.missing:
             lines.append(f"Missing tooth or space: {', '.join(spacing.missing)}")
         if spacing.third_molars_missing:
             lines.append(f"Third molar not detected: {', '.join(spacing.third_molars_missing)}")
+        self._set_card(
+            "Spacing",
+            f"● {_plural(len(spacing.missing), 'missing tooth or space', 'missing teeth or spaces')}"
+            if spacing.missing else "● No missing teeth or spaces",
+            color,
+            "\n".join(lines),
+        )
+
+        lines = [
+            f"Extra tooth: {_plural(count, 'tooth', 'teeth')} numbered {number}"
+            for number, count in spacing.extra_numbers.items()
+        ]
         if len(lines) > MAX_SPACING_LINES:
             lines = lines[:MAX_SPACING_LINES] + [f"…and {len(lines) - MAX_SPACING_LINES} more"]
-        summary = "● " + " · ".join(parts) if parts else "● No overcrowding or missing teeth found"
-        self._set_card("Spacing & Overcrowding", summary, color, "\n".join(lines))
+        self._set_card(
+            "Overcrowding",
+            f"● Possible overcrowding: {_plural(spacing.extra_teeth, 'extra tooth', 'extra teeth')}"
+            if spacing.has_overcrowding else "● No extra teeth found",
+            color,
+            "\n".join(lines),
+        )
 
         if result.impacted:
             numbers = [i.fdi or "unnumbered" for i in result.impacted]
@@ -691,11 +815,14 @@ class App(ctk.CTk):
         detected = result.detected_numbers if result else set()
         impacted = result.impacted_numbers if result else set()
         extra = result.spacing.extra_numbers if result else {}
+        spaces = set(result.spacing.missing) if result else set()
         for number, cell in self.fdi_cells.items():
             if number in impacted:
                 cell.configure(text_color=DANGER)
             elif number in extra:
-                cell.configure(text_color=PENDING)
+                cell.configure(text_color=CROWDING_BOX)
+            elif number in spaces:
+                cell.configure(text_color=SPACING_BOX)
             elif number in detected:
                 cell.configure(text_color=TEXT_PRIMARY)
             else:
@@ -764,6 +891,8 @@ class App(ctk.CTk):
         self.analysis = None
         self.approved_at = None
         self._analysis_error = None
+        self.highlighted = set()  # findings to highlight on the X-ray; empty = all
+        self._fitted_cache = None  # don't keep the previous X-ray in memory
 
     # --- Camera capture --------------------------------------------------------
     def on_camera(self):
@@ -980,6 +1109,28 @@ def _draw_dashed_rect(draw, box, color, width=2, dash=14, gap=10):
         draw.line([(right, y), (right, y_end)], fill=color, width=width)
 
 
+def _bind_click_tree(widget, handler):
+    """Bind a click on a widget and every widget inside it.
+
+    Uses plain tkinter on each underlying widget: CTk's own bind() forwards to its
+    inner widgets, so combining both would fire the handler twice. Children come
+    from tkinter.Misc.winfo_children because CTkFrame's override hides its
+    background canvas, which is what a click on a card's empty area actually hits.
+    """
+    tkinter.Misc.bind(widget, "<Button-1>", handler, "+")
+    for child in tkinter.Misc.winfo_children(widget):
+        _bind_click_tree(child, handler)
+
+
+def _set_cursor_tree(widget, cursor):
+    try:
+        tkinter.Misc.configure(widget, cursor=cursor)
+    except tkinter.TclError:
+        pass  # a widget type without a cursor option
+    for child in tkinter.Misc.winfo_children(widget):  # includes CTkFrame canvases
+        _set_cursor_tree(child, cursor)
+
+
 def _plural(count, singular, plural=None):
     return f"{count} {singular if count == 1 else plural or singular + 's'}"
 
@@ -996,33 +1147,62 @@ def _overlay_font(size):
     return _overlay_fonts[size]
 
 
-def _draw_analysis_overlay(image, analysis, scale):
-    """AI boxes on a display copy: blue teeth, amber extra teeth, thick red impacted teeth."""
-    draw = ImageDraw.Draw(image)
-    font = _overlay_font(10)
+def _draw_analysis_overlay(image, analysis, scale, highlighted=frozenset()):
+    """AI boxes on a display copy, one colour per finding (see ASSESSMENT_CARDS swatches):
+    blue teeth, orange extra teeth, dashed violet gaps, thick red impacted teeth on top.
+
+    Findings not in `highlighted` are faded; an empty set highlights everything.
+    Returns a new RGB image.
+    """
     impacted = analysis.impacted_numbers
     extra = analysis.spacing.extra_numbers
+    # (finding, dashed, box, tag, colour, line width), in drawing order.
+    shapes = []
     for tooth in analysis.teeth:
         if tooth.label in impacted:
             continue  # drawn in red below
-        box = [c * scale for c in tooth.box]
-        color = PENDING if tooth.label in extra else TOOTH_BOX
-        draw.rectangle(box, outline=color, width=2 if tooth.label in extra else 1)
-        _draw_tag(draw, box, tooth.label, color, font)
+        is_extra = tooth.label in extra
+        shapes.append((
+            "crowding" if is_extra else "fdi", False, [c * scale for c in tooth.box],
+            tooth.label, CROWDING_BOX if is_extra else TOOTH_BOX, 2 if is_extra else 1,
+        ))
+    for space in analysis.spacing.spaces:
+        shapes.append((
+            "spacing", True, [round(c * scale) for c in space.box],
+            f"Space {', '.join(space.numbers)}", SPACING_BOX, 2,
+        ))
     for item in analysis.impacted:
-        box = [c * scale for c in item.detection.box]
-        draw.rectangle(box, outline=DANGER, width=3)
-        _draw_tag(draw, box, f"Impacted {item.fdi}" if item.fdi else "Impacted", DANGER, font)
+        shapes.append((
+            "impacted", False, [c * scale for c in item.detection.box],
+            f"Impacted {item.fdi}" if item.fdi else "Impacted", DANGER, 3,
+        ))
+
+    def bright(finding):
+        return not highlighted or finding in highlighted
+
+    # Draw on a transparent layer, faded findings first so they never cover bright ones.
+    layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    font = _overlay_font(10)
+    for finding, dashed, box, tag, color, width in sorted(shapes, key=lambda s: bright(s[0])):
+        alpha = 255 if bright(finding) else DIMMED_ALPHA
+        rgba = (*ImageColor.getrgb(color), alpha)
+        if dashed:
+            _draw_dashed_rect(draw, box, rgba, width=width, dash=5, gap=3)
+        else:
+            draw.rectangle(box, outline=rgba, width=width)
+        _draw_tag(draw, box, tag, rgba, font, text_color=(*ImageColor.getrgb(BG_SIDEBAR), alpha))
+    return Image.alpha_composite(image.convert("RGBA"), layer).convert("RGB")
 
 
-def _draw_tag(draw, box, text, color, font):
+def _draw_tag(draw, box, text, color, font, text_color=BG_SIDEBAR):
     """Small filled label at a box's top-left corner (inside if there's no room above)."""
     left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
     width, height = right - left + 6, bottom - top + 4
     x = box[0]
     y = box[1] - height if box[1] - height >= 0 else box[1]
     draw.rectangle([x, y, x + width, y + height], fill=color)
-    draw.text((x + 3 - left, y + 2 - top), text, fill=BG_SIDEBAR, font=font)
+    draw.text((x + 3 - left, y + 2 - top), text, fill=text_color, font=font)
 
 
 def _draw_framing_guide(image):
