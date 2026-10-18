@@ -2,20 +2,24 @@
 
 A clinician signs in first (see login.py), then the three-column workspace
 opens. An X-ray comes in from a PNG/JPEG/DICOM file (see ingestion.py) or a
-webcam photo of a print (see camera.py). The AI backend (tooth detection,
-spacing analysis, displacement grading) is not implemented yet; the remaining
-workspace button handlers are stubs.
+webcam photo of a print (see camera.py), and is analyzed automatically
+(see inference.py): FDI tooth numbering, impacted teeth, and an experimental
+spacing estimate. Results stay AI suggestions until the clinician approves.
+Export is still a stub, so nothing is saved.
 """
 
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
 
 import customtkinter as ctk
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
+from analysis import LOWER_ARCH, UPPER_ARCH
 from auth import ClinicianStore
 from camera import CameraStream, camera_name, list_cameras
+from inference import AnalysisUnavailable, Analyzer
 from ingestion import FILE_TYPES, XrayLoadError, load_xray
 from login import LoginView
 from theme import (
@@ -34,9 +38,15 @@ from theme import (
     SUCCESS_HOVER,
     TEXT_MUTED,
     TEXT_PRIMARY,
+    TOOTH_BOX,
 )
 
-SEVERITY_TIERS = ["Perfect", "Mild", "Moderate", "Severe", "Very Severe"]
+ASSESSMENT_CARDS = [
+    ("FDI Tooth Detection", "Tooth numbering (FDI notation)"),
+    ("Spacing & Overcrowding", "From tooth numbering: extra or missing teeth"),
+    ("Impacted Tooth", "Impacted tooth detection"),
+]
+MAX_SPACING_LINES = 3
 
 DROP_PROMPT = "Upload a 2D panoramic X-ray (DICOM, PNG, or JPEG) to begin."
 
@@ -97,6 +107,17 @@ class App(ctk.CTk):
         self._probe_future = None
         self._probe_executor = ThreadPoolExecutor(max_workers=1)
 
+        # AI analysis: models load once after sign-in, then run on each new X-ray.
+        # One worker thread, so loading and analyses never overlap.
+        self.analyzer = Analyzer()
+        self._ai_executor = ThreadPoolExecutor(max_workers=1)
+        self._ai_state = "idle"  # idle / loading / ready / unavailable
+        self._ai_error = None
+        self.analysis = None  # AnalysisResult for current_image, once it's done
+        self.approved_at = None
+        self._analysis_token = 0  # bumped on every new image/clear/sign-out
+        self._analysis_error = None
+
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._show_login()
 
@@ -112,16 +133,19 @@ class App(ctk.CTk):
         self._build_sidebar()
         self._build_canvas()
         self._build_analysis_panel()
+        self._preload_models()
 
     def on_sign_out(self):
         self._close_camera()
         self.current_image = None
+        self._reset_analysis()  # any analysis still running is dropped by its token
         self._uploading = False  # any upload still loading is dropped by _poll_upload
+        for frame in (self.sidebar, self.canvas_frame, self.analysis_panel):
+            frame.destroy()
+        # Cancel after destroying: tearing down the canvas fires one last resize event.
         if self._resize_job is not None:
             self.after_cancel(self._resize_job)
             self._resize_job = None
-        for frame in (self.sidebar, self.canvas_frame, self.analysis_panel):
-            frame.destroy()
         self.clinician = None
         self._show_login()
 
@@ -233,6 +257,21 @@ class App(ctk.CTk):
         )
         self.canvas_source_label.grid(row=0, column=1, padx=(16, 0), sticky="e")
 
+        # Shown once AI results exist; hides the boxes to see the bare X-ray.
+        self.overlay_switch = ctk.CTkSwitch(
+            header,
+            text="AI overlay",
+            command=self._render_canvas,
+            font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+            text_color=TEXT_MUTED,
+            progress_color=ACCENT,
+            switch_width=32,
+            switch_height=16,
+        )
+        self.overlay_switch.select()
+        self.overlay_switch.grid(row=0, column=2, padx=(16, 0), sticky="e")
+        self.overlay_switch.grid_remove()
+
         self.image_label = ctk.CTkLabel(
             self.canvas_frame,
             text=DROP_PROMPT,
@@ -334,7 +373,7 @@ class App(ctk.CTk):
     def _render_canvas(self):
         """Show the frozen capture, the current X-ray, or the empty drop zone."""
         self._resize_job = None
-        if self._canvas_size is None:
+        if self._canvas_size is None or not self.image_label.winfo_exists():
             return
         if self.camera_mode == "live":
             # The preview loop redraws every new frame; a status/error message
@@ -345,7 +384,8 @@ class App(ctk.CTk):
         if self.camera_mode == "review":
             self._show_on_canvas(self.captured_image)
         elif self.current_image is not None:
-            self._show_on_canvas(self.current_image)
+            show_overlay = self.analysis is not None and self.overlay_switch.get() == 1
+            self._show_on_canvas(self.current_image, analysis=self.analysis if show_overlay else None)
         else:
             self._render_placeholder(*self._canvas_size)
 
@@ -354,8 +394,11 @@ class App(ctk.CTk):
         scale = self.image_label._get_widget_scaling()
         return max(int(width / scale), 50), max(int(height / scale), 50)
 
-    def _show_on_canvas(self, image, guide=False):
-        """Fit `image` into the canvas without stretching, on the drop-zone background."""
+    def _show_on_canvas(self, image, guide=False, analysis=None):
+        """Fit `image` into the canvas without stretching, on the drop-zone background.
+
+        With `analysis`, AI boxes are drawn on the fitted copy (never on `image`).
+        """
         w, h = self._canvas_logical_size(*self._canvas_size)
         # Always fill the whole label so its size (and the layout) never shifts.
         background = Image.new("RGB", (w, h), BG_SURFACE)
@@ -365,6 +408,9 @@ class App(ctk.CTk):
         fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
         if guide:
             _draw_framing_guide(fitted)
+        if analysis is not None:
+            fitted = fitted.convert("RGB")
+            _draw_analysis_overlay(fitted, analysis, scale=fitted.width / image.width)
         background.paste(fitted, ((w - fitted.width) // 2, (h - fitted.height) // 2))
 
         self.canvas_image = ctk.CTkImage(light_image=background, dark_image=background, size=(w, h))
@@ -400,35 +446,46 @@ class App(ctk.CTk):
 
     # --- Right column: analysis & verification -------------------------------
     def _build_analysis_panel(self):
-        self.analysis_panel = ctk.CTkFrame(self, fg_color=BG_SURFACE, corner_radius=14)
-        self.analysis_panel.grid(row=0, column=2, sticky="nsew", padx=(0, 16), pady=16)
-        self.analysis_panel.grid_columnconfigure(0, weight=1)
+        panel = self.analysis_panel = ctk.CTkFrame(self, fg_color=BG_SURFACE, corner_radius=14)
+        panel.grid(row=0, column=2, sticky="nsew", padx=(0, 16), pady=16)
+        panel.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(
-            self.analysis_panel,
+        self.assessment_title = ctk.CTkLabel(
+            panel,
             text="Orthodontic Assessment",
             font=ctk.CTkFont(family=FONT_FAMILY, size=18, weight="bold"),
             text_color=TEXT_PRIMARY,
-        ).grid(row=0, column=0, padx=18, pady=(18, 12), sticky="w")
+            justify="left",
+            anchor="w",
+        )
+        self.assessment_title.grid(row=0, column=0, padx=18, pady=(18, 2), sticky="w")
+
+        # AI state, timing and approval. Amber while results still need review.
+        self.ai_status_label = ctk.CTkLabel(
+            panel,
+            text="",
+            font=ctk.CTkFont(family=FONT_FAMILY, size=12),
+            text_color=TEXT_MUTED,
+            wraplength=250,
+            justify="left",
+            anchor="w",
+        )
+        self.ai_status_label.grid(row=1, column=0, padx=18, pady=(0, 8), sticky="w")
 
         self.status_labels = {}
-        cards = [
-            ("FDI Tooth Detection", "Tooth numbering (FDI notation)"),
-            ("Spacing & Overcrowding", "Inter-dental spacing analysis"),
-            ("Displacement Severity", "5-tier displacement grading"),
-        ]
-        for i, (title, subtitle) in enumerate(cards, start=1):
-            card = self._build_card(self.analysis_panel, title, subtitle)
+        self.card_details = {}
+        self.card_subtitles = []
+        for i, (title, subtitle) in enumerate(ASSESSMENT_CARDS, start=2):
+            card = self._build_card(panel, title, subtitle)
             card.grid(row=i, column=0, padx=14, pady=6, sticky="ew")
-
-        # Placeholder severity scale on the last card.
-        self._build_severity_scale(card)
+        self._build_fdi_chart(self.status_labels["FDI Tooth Detection"].master)
 
         # Spacer pushes the verify button to the very bottom.
-        self.analysis_panel.grid_rowconfigure(len(cards) + 1, weight=1)
+        bottom = len(ASSESSMENT_CARDS) + 2
+        panel.grid_rowconfigure(bottom, weight=1)
 
         self.verify_button = ctk.CTkButton(
-            self.analysis_panel,
+            panel,
             text="Verify & Approve",
             command=self.on_verify,
             height=50,
@@ -437,7 +494,23 @@ class App(ctk.CTk):
             fg_color=SUCCESS,
             hover_color=SUCCESS_HOVER,
         )
-        self.verify_button.grid(row=len(cards) + 2, column=0, padx=14, pady=16, sticky="ew")
+        self.verify_button.grid(row=bottom + 1, column=0, padx=14, pady=16, sticky="ew")
+        # Text wraps to the panel's real width (it's 25% of the window).
+        panel.bind("<Configure>", self._on_panel_resize)
+        self._show_assessment()
+
+    def _on_panel_resize(self, event):
+        width = event.width / self.analysis_panel._get_widget_scaling()
+        self.assessment_title.configure(wraplength=max(width - 36, 120))
+        self.ai_status_label.configure(wraplength=max(width - 36, 120))
+        card_text = max(width - 64, 100)  # panel and card padding on both sides
+        for label in (*self.card_subtitles, *self.status_labels.values(), *self.card_details.values()):
+            label.configure(wraplength=card_text)
+        # Too narrow for 16 two-digit numbers: show tooth position only (8...1 | 1...8);
+        # the quadrant is clear from the row and the side of the midline.
+        compact = card_text < 230
+        for number, cell in self.fdi_cells.items():
+            cell.configure(text=number[1] if compact else number)
 
     def _build_card(self, parent, title, subtitle):
         card = ctk.CTkFrame(
@@ -453,43 +526,244 @@ class App(ctk.CTk):
             anchor="w",
         ).grid(row=0, column=0, padx=14, pady=(12, 0), sticky="w")
 
-        ctk.CTkLabel(
+        subtitle_label = ctk.CTkLabel(
             card,
             text=subtitle,
             font=ctk.CTkFont(family=FONT_FAMILY, size=11),
             text_color=TEXT_MUTED,
             anchor="w",
-        ).grid(row=1, column=0, padx=14, pady=(0, 4), sticky="w")
+            justify="left",
+        )
+        subtitle_label.grid(row=1, column=0, padx=14, pady=(0, 4), sticky="w")
+        self.card_subtitles.append(subtitle_label)
 
         status = ctk.CTkLabel(
             card,
-            text="● Pending",
+            text="",
             font=ctk.CTkFont(family=FONT_FAMILY, size=12, weight="bold"),
-            text_color=PENDING,
+            text_color=TEXT_MUTED,
             anchor="w",
+            justify="left",
+            wraplength=240,
         )
-        status.grid(row=2, column=0, padx=14, pady=(0, 12), sticky="w")
+        status.grid(row=2, column=0, padx=14, pady=(0, 10), sticky="w")
         self.status_labels[title] = status
+
+        # Row 3 is free for a card's own widget (the FDI chart).
+        details = ctk.CTkLabel(
+            card,
+            text="",
+            font=ctk.CTkFont(family=FONT_FAMILY, size=11),
+            text_color=TEXT_MUTED,
+            anchor="w",
+            justify="left",
+            wraplength=240,
+        )
+        details.grid(row=4, column=0, padx=14, pady=(0, 10), sticky="w")
+        self.card_details[title] = details
         return card
 
-    def _build_severity_scale(self, card):
-        """Dimmed 5-tier scale; will highlight the detected tier once the model runs."""
-        scale = ctk.CTkFrame(card, fg_color="transparent")
-        scale.grid(row=3, column=0, padx=14, pady=(0, 14), sticky="ew")
-        self.severity_segments = []
-        for i, tier in enumerate(SEVERITY_TIERS):
-            scale.grid_columnconfigure(i, weight=1, uniform="tiers")
-            segment = ctk.CTkFrame(scale, height=6, corner_radius=3, fg_color=BORDER)
-            segment.grid(row=0, column=i, padx=2, sticky="ew")
-            self.severity_segments.append(segment)
-        ctk.CTkLabel(
-            scale, text=SEVERITY_TIERS[0], font=ctk.CTkFont(family=FONT_FAMILY, size=10),
-            text_color=TEXT_MUTED,
-        ).grid(row=1, column=0, columnspan=2, sticky="w")
-        ctk.CTkLabel(
-            scale, text=SEVERITY_TIERS[-1], font=ctk.CTkFont(family=FONT_FAMILY, size=10),
-            text_color=TEXT_MUTED,
-        ).grid(row=1, column=3, columnspan=2, sticky="e")
+    def _build_fdi_chart(self, card):
+        """Dental chart: patient's right on the left, as on the X-ray. Upper jaw on top."""
+        chart = ctk.CTkFrame(card, fg_color="transparent")
+        chart.grid(row=3, column=0, padx=14, pady=(0, 8), sticky="ew")
+        self.fdi_cells = {}
+        # Small enough that 16 numbers still fit at the minimum window width.
+        font = ctk.CTkFont(family=FONT_FAMILY, size=9, weight="bold")
+        for row, arch in enumerate((UPPER_ARCH, LOWER_ARCH)):
+            for i, number in enumerate(arch):
+                column = i if i < 8 else i + 1  # column 8 is the midline
+                chart.grid_columnconfigure(column, weight=1, uniform="fdi")
+                cell = ctk.CTkLabel(
+                    chart, text=number, font=font, text_color=BORDER, width=1, height=18
+                )
+                cell.grid(row=row, column=column, sticky="ew")
+                self.fdi_cells[number] = cell
+        # CTkFrame defaults to 200x200; size the dividers explicitly or they stretch the chart.
+        ctk.CTkFrame(chart, width=1, height=1, fg_color=BORDER).grid(
+            row=0, column=8, rowspan=2, sticky="ns", padx=2
+        )
+        ctk.CTkFrame(chart, width=1, height=1, fg_color=BORDER).grid(
+            row=0, column=0, columnspan=17, sticky="sew"
+        )
+
+    def _set_card(self, title, status, color, details=""):
+        self.status_labels[title].configure(text=status, text_color=color)
+        label = self.card_details[title]
+        label.configure(text=details)
+        label.grid() if details else label.grid_remove()
+
+    def _show_assessment(self):
+        """Redraw the whole right panel from the current AI state."""
+        if self.clinician is None:
+            return  # signed out; the panel is gone
+        result = self.analysis
+        approved = self.approved_at is not None
+
+        if self._ai_state == "unavailable":
+            status, status_color = self._ai_error, DANGER
+        elif self.current_image is None:
+            status = "Loading AI models…" if self._ai_state == "loading" else (
+                "Upload an X-ray or use the camera to start."
+            )
+            status_color = TEXT_MUTED
+        elif self._analysis_error:
+            status, status_color = self._analysis_error, DANGER
+        elif result is None:
+            status = "Loading AI models…" if self._ai_state == "loading" else "Analyzing X-ray…"
+            status_color = PENDING
+        elif approved:
+            status = f"✓ Approved by {self.clinician} at {self.approved_at:%H:%M}"
+            status_color = SUCCESS
+        else:
+            seconds = result.timings_ms["total"] / 1000
+            status = f"AI suggestion — needs your review · analyzed in {seconds:.1f} s"
+            status_color = PENDING
+        self.ai_status_label.configure(text=status, text_color=status_color)
+
+        if result is None:
+            if self._ai_state == "unavailable" or self._analysis_error:
+                card_status, color = "● Not available", DANGER
+            elif self.current_image is None:
+                card_status, color = "● Waiting for an X-ray", TEXT_MUTED
+            else:
+                card_status, color = "● Analyzing…", PENDING
+            for title, _ in ASSESSMENT_CARDS:
+                self._set_card(title, card_status, color)
+            self._color_fdi_chart(None)
+        else:
+            self._show_results(result, SUCCESS if approved else PENDING)
+            self._color_fdi_chart(result)
+
+        self.verify_button.configure(
+            state="normal" if result is not None and not approved else "disabled",
+            text="Approved" if approved else "Verify & Approve",
+        )
+        if result is not None:
+            self.overlay_switch.grid()
+        else:
+            self.overlay_switch.grid_remove()
+
+    def _show_results(self, result, color):
+        spacing = result.spacing
+        status = f"● {len(result.detected_numbers)} of 32 teeth detected"
+        if spacing.extra_teeth:
+            status += f", {spacing.extra_teeth} extra"
+        # Missing numbers are listed on the Spacing card; the chart shows them dimmed.
+        self._set_card("FDI Tooth Detection", status, color)
+
+        parts = []
+        if spacing.has_overcrowding:
+            parts.append(
+                f"Possible overcrowding: {_plural(spacing.extra_teeth, 'extra tooth', 'extra teeth')}"
+            )
+        if spacing.missing:
+            parts.append(_plural(len(spacing.missing), "missing tooth or space", "missing teeth or spaces"))
+        lines = [
+            f"Extra tooth: {_plural(count, 'tooth', 'teeth')} numbered {number}"
+            for number, count in spacing.extra_numbers.items()
+        ]
+        if spacing.missing:
+            lines.append(f"Missing tooth or space: {', '.join(spacing.missing)}")
+        if spacing.third_molars_missing:
+            lines.append(f"Third molar not detected: {', '.join(spacing.third_molars_missing)}")
+        if len(lines) > MAX_SPACING_LINES:
+            lines = lines[:MAX_SPACING_LINES] + [f"…and {len(lines) - MAX_SPACING_LINES} more"]
+        summary = "● " + " · ".join(parts) if parts else "● No overcrowding or missing teeth found"
+        self._set_card("Spacing & Overcrowding", summary, color, "\n".join(lines))
+
+        if result.impacted:
+            numbers = [i.fdi or "unnumbered" for i in result.impacted]
+            confidences = ", ".join(
+                f"{i.fdi or 'unnumbered'} {i.detection.score:.0%}" for i in result.impacted
+            )
+            self._set_card(
+                "Impacted Tooth",
+                f"● {_plural(len(numbers), 'impacted tooth', 'impacted teeth')}: "
+                f"{', '.join(numbers)}",
+                color,
+                f"Confidence: {confidences}",
+            )
+        else:
+            self._set_card("Impacted Tooth", "● No impacted teeth found", color)
+
+    def _color_fdi_chart(self, result):
+        detected = result.detected_numbers if result else set()
+        impacted = result.impacted_numbers if result else set()
+        extra = result.spacing.extra_numbers if result else {}
+        for number, cell in self.fdi_cells.items():
+            if number in impacted:
+                cell.configure(text_color=DANGER)
+            elif number in extra:
+                cell.configure(text_color=PENDING)
+            elif number in detected:
+                cell.configure(text_color=TEXT_PRIMARY)
+            else:
+                cell.configure(text_color=BORDER)
+
+    # --- AI analysis ------------------------------------------------------------
+    def _preload_models(self):
+        """Load the models right after sign-in so the first X-ray is analyzed quickly."""
+        if self._ai_state in ("loading", "ready"):
+            return
+        self._ai_state = "loading"
+        self._ai_error = None
+        self._show_assessment()
+        self._poll_ai(self._ai_executor.submit(self.analyzer.load), self._on_models_loaded)
+
+    def _poll_ai(self, future, callback, *args):
+        """Check the worker from the UI thread; Tk widgets must only be touched here."""
+        if not future.done():
+            self.after(50, self._poll_ai, future, callback, *args)
+            return
+        callback(future, *args)
+
+    def _on_models_loaded(self, future):
+        try:
+            future.result()
+            self._ai_state = "ready"
+        except AnalysisUnavailable as exc:
+            self._ai_state, self._ai_error = "unavailable", str(exc)
+        except Exception as exc:  # noqa: BLE001 - shown in the panel instead of crashing
+            self._ai_state = "unavailable"
+            self._ai_error = f"The AI models couldn't be loaded ({exc})."
+        self._show_assessment()
+
+    def _start_analysis(self):
+        """Analyze current_image in the background; called whenever it changes."""
+        self._reset_analysis()
+        if self._ai_state == "unavailable":
+            self._show_assessment()
+            return
+        token = self._analysis_token
+        future = self._ai_executor.submit(self.analyzer.analyze, self.current_image)
+        self._show_assessment()
+        self._poll_ai(future, self._on_analysis_done, token)
+
+    def _on_analysis_done(self, future, token):
+        if token != self._analysis_token:
+            return  # the image changed, was cleared, or the user signed out
+        try:
+            result = future.result()
+        except AnalysisUnavailable as exc:
+            self._ai_state, self._ai_error = "unavailable", str(exc)
+            self._show_assessment()
+            return
+        except Exception as exc:  # noqa: BLE001 - one bad image shouldn't stop the app
+            self._analysis_error = f"The analysis failed on this X-ray ({exc})."
+            self._show_assessment()
+            return
+        self._ai_state = "ready"
+        self.analysis = result
+        self._show_assessment()
+        self._render_canvas()
+
+    def _reset_analysis(self):
+        """Forget results for the previous image and ignore any analysis still running."""
+        self._analysis_token += 1
+        self.analysis = None
+        self.approved_at = None
+        self._analysis_error = None
 
     # --- Camera capture --------------------------------------------------------
     def on_camera(self):
@@ -612,11 +886,12 @@ class App(ctk.CTk):
         width, height = self.current_image.size
         self._set_canvas_source(f"Camera photo — {width} × {height}")
         self._close_camera()
+        self._start_analysis()
 
     def _on_close(self):
         self._close_camera(wait=True)
-        self._probe_executor.shutdown(wait=False, cancel_futures=True)
-        self._upload_executor.shutdown(wait=False, cancel_futures=True)
+        for executor in (self._probe_executor, self._upload_executor, self._ai_executor):
+            executor.shutdown(wait=False, cancel_futures=True)
         self.destroy()
 
     # --- File upload -----------------------------------------------------------
@@ -665,6 +940,7 @@ class App(ctk.CTk):
         self.current_image = image
         width, height = image.size
         self._set_canvas_source(f"{path.name} — {width} × {height}")
+        self._start_analysis()
         self._render_canvas()
 
     def _set_canvas_source(self, text, error=False):
@@ -676,14 +952,20 @@ class App(ctk.CTk):
     def on_clear(self):
         self._close_camera()
         self.current_image = None
+        self._reset_analysis()
         self._set_canvas_source("")
+        self._show_assessment()
         self._render_canvas()
 
     def on_export(self):
         pass
 
     def on_verify(self):
-        pass
+        """Clinician sign-off on the AI suggestions (in memory; nothing is saved yet)."""
+        if self.analysis is None or self.approved_at is not None:
+            return
+        self.approved_at = datetime.now()
+        self._show_assessment()
 
 
 def _draw_dashed_rect(draw, box, color, width=2, dash=14, gap=10):
@@ -696,6 +978,51 @@ def _draw_dashed_rect(draw, box, color, width=2, dash=14, gap=10):
         y_end = min(y + dash, bottom)
         draw.line([(left, y), (left, y_end)], fill=color, width=width)
         draw.line([(right, y), (right, y_end)], fill=color, width=width)
+
+
+def _plural(count, singular, plural=None):
+    return f"{count} {singular if count == 1 else plural or singular + 's'}"
+
+
+_overlay_fonts = {}
+
+
+def _overlay_font(size):
+    if size not in _overlay_fonts:
+        try:
+            _overlay_fonts[size] = ImageFont.truetype("segoeuib.ttf", size)
+        except OSError:
+            _overlay_fonts[size] = ImageFont.load_default()
+    return _overlay_fonts[size]
+
+
+def _draw_analysis_overlay(image, analysis, scale):
+    """AI boxes on a display copy: blue teeth, amber extra teeth, thick red impacted teeth."""
+    draw = ImageDraw.Draw(image)
+    font = _overlay_font(10)
+    impacted = analysis.impacted_numbers
+    extra = analysis.spacing.extra_numbers
+    for tooth in analysis.teeth:
+        if tooth.label in impacted:
+            continue  # drawn in red below
+        box = [c * scale for c in tooth.box]
+        color = PENDING if tooth.label in extra else TOOTH_BOX
+        draw.rectangle(box, outline=color, width=2 if tooth.label in extra else 1)
+        _draw_tag(draw, box, tooth.label, color, font)
+    for item in analysis.impacted:
+        box = [c * scale for c in item.detection.box]
+        draw.rectangle(box, outline=DANGER, width=3)
+        _draw_tag(draw, box, f"Impacted {item.fdi}" if item.fdi else "Impacted", DANGER, font)
+
+
+def _draw_tag(draw, box, text, color, font):
+    """Small filled label at a box's top-left corner (inside if there's no room above)."""
+    left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
+    width, height = right - left + 6, bottom - top + 4
+    x = box[0]
+    y = box[1] - height if box[1] - height >= 0 else box[1]
+    draw.rectangle([x, y, x + width, y + height], fill=color)
+    draw.text((x + 3 - left, y + 2 - top), text, fill=BG_SIDEBAR, font=font)
 
 
 def _draw_framing_guide(image):
