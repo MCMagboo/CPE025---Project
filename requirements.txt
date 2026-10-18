@@ -2,3 +2,9 @@ customtkinter
 Pillow
 opencv-python
 pydicom
+# AI models. Install the CPU builds of torch/torchvision first, then ultralytics:
+#   py -3.13 -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#   py -3.13 -m pip install ultralytics
+torch
+torchvision
+ultralytics

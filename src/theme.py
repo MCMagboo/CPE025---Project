@@ -14,5 +14,6 @@ SUCCESS = "#2E9E6A"
 SUCCESS_HOVER = "#257F55"
 PENDING = "#D4A017"
 DANGER = "#E5534B"
+TOOTH_BOX = "#5FB4E6"  # AI tooth outlines on the X-ray (impacted teeth use DANGER)
 
 FONT_FAMILY = "Segoe UI"
