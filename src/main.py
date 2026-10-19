@@ -15,14 +15,17 @@ import tkinter
 from tkinter import filedialog
 
 import customtkinter as ctk
-from PIL import Image, ImageColor, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageOps
 
 from analysis import LOWER_ARCH, UPPER_ARCH
 from auth import ClinicianStore
 from camera import CameraStream, camera_name, list_cameras
+from export_dialog import ExportDialog
 from inference import AnalysisUnavailable, Analyzer
 from ingestion import FILE_TYPES, XrayLoadError, load_xray
 from login import LoginView
+from overlay import draw_analysis_overlay, draw_dashed_rect
+from report import ReportData, save_report_pdf
 from theme import (
     ACCENT,
     ACCENT_HOVER,
@@ -45,18 +48,18 @@ from theme import (
 )
 
 # (finding key, title, subtitle, colour of this finding's boxes on the X-ray).
-# Clicking a card highlights its finding's boxes; the others fade to DIMMED_ALPHA.
+# Clicking a card highlights its finding's boxes; the others fade to overlay.DIMMED_ALPHA.
 ASSESSMENT_CARDS = [
     ("fdi", "FDI Tooth Detection", "Tooth numbering (FDI notation)", TOOTH_BOX),
     ("spacing", "Spacing", "Missing teeth or spaces, from tooth numbering", SPACING_BOX),
     ("crowding", "Overcrowding", "Extra teeth, from tooth numbering", CROWDING_BOX),
     ("impacted", "Impacted Tooth", "Impacted tooth detection", DANGER),
 ]
-DIMMED_ALPHA = 60  # ~25% opacity for boxes of findings that aren't highlighted
 MAX_SPACING_LINES = 3
 
 DROP_PROMPT = "Upload a 2D panoramic X-ray (DICOM, PNG, or JPEG) to begin."
 
+APP_VERSION = "v0.1.0"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 CAMERA_POLL_MS = 33  # ~30 fps live preview
@@ -103,6 +106,16 @@ class App(ctk.CTk):
         self._upload_executor = ThreadPoolExecutor(max_workers=1)
         self._upload_dir = DATA_DIR if DATA_DIR.is_dir() else Path.home()
         self._uploading = False
+
+        # Report export (PDF), allowed only after the clinician approves. The PDF is
+        # written on a worker thread; the clinician picks where it goes.
+        self._export_executor = ThreadPoolExecutor(max_workers=1)
+        documents = Path.home() / "Documents"
+        self._report_dir = documents if documents.is_dir() else Path.home()
+        self._exporting = False
+        self._report_case = ""
+        self._report_notes = ""
+        self._report_message = None  # (text, is_error) shown under the approval line
 
         # Camera capture state. camera_mode is None, "live" or "review".
         self.camera = None
@@ -200,6 +213,9 @@ class App(ctk.CTk):
             self.sidebar_buttons[text] = button
         # Its label toggles to "Close Camera" while the camera is on.
         self.camera_button = self.sidebar_buttons["Open Camera"]
+        # Enabled only once the findings are approved (see _show_assessment).
+        self.export_button = self.sidebar_buttons["Export Report"]
+        self.export_button.configure(state="disabled")
 
         # Spacer pushes the account block and version label to the bottom.
         bottom = len(actions) + 2
@@ -231,7 +247,7 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(
             self.sidebar,
-            text="v0.1.0 · UI preview",
+            text=f"{APP_VERSION} · UI preview",
             font=ctk.CTkFont(family=FONT_FAMILY, size=11),
             text_color=TEXT_MUTED,
         ).grid(row=bottom + 3, column=0, padx=20, pady=16, sticky="w")
@@ -460,7 +476,7 @@ class App(ctk.CTk):
                 fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
                 self._fitted_cache = (image, (w, h), fitted)
         if analysis is not None:
-            fitted = _draw_analysis_overlay(
+            fitted = draw_analysis_overlay(
                 fitted, analysis, scale=fitted.width / image.width, highlighted=highlighted
             )
         background.paste(fitted, ((w - fitted.width) // 2, (h - fitted.height) // 2))
@@ -483,7 +499,7 @@ class App(ctk.CTk):
         draw.rounded_rectangle([0, 0, w - 1, h - 1], radius=12, fill=BG_PLACEHOLDER)
 
         inset = 10
-        _draw_dashed_rect(draw, (inset, inset, w - inset - 1, h - inset - 1), BORDER)
+        draw_dashed_rect(draw, (inset, inset, w - inset - 1, h - inset - 1), BORDER)
 
         # Simple arc hinting at a dental arch, sitting above the prompt text.
         cx, cy = w // 2, h // 2 - 40
@@ -687,6 +703,12 @@ class App(ctk.CTk):
         elif approved:
             status = f"✓ Approved by {self.clinician} at {self.approved_at:%H:%M}"
             status_color = SUCCESS
+            if self._exporting:
+                status += " · Saving report…"
+            elif self._report_message:
+                message, is_error = self._report_message
+                status += f" · {message}"
+                status_color = DANGER if is_error else SUCCESS
         else:
             seconds = result.timings_ms["total"] / 1000
             status = f"AI suggestion — needs your review · analyzed in {seconds:.1f} s"
@@ -710,6 +732,10 @@ class App(ctk.CTk):
         self.verify_button.configure(
             state="normal" if result is not None and not approved else "disabled",
             text="Approved" if approved else "Verify & Approve",
+        )
+        # Reports only for approved findings (human-in-the-loop).
+        self.export_button.configure(
+            state="normal" if approved and not self._exporting else "disabled"
         )
         if result is not None:
             self.overlay_bar.grid()
@@ -893,6 +919,10 @@ class App(ctk.CTk):
         self._analysis_error = None
         self.highlighted = set()  # findings to highlight on the X-ray; empty = all
         self._fitted_cache = None  # don't keep the previous X-ray in memory
+        # Notes and case reference belong to this X-ray's report only.
+        self._report_case = ""
+        self._report_notes = ""
+        self._report_message = None
 
     # --- Camera capture --------------------------------------------------------
     def on_camera(self):
@@ -1019,7 +1049,8 @@ class App(ctk.CTk):
 
     def _on_close(self):
         self._close_camera(wait=True)
-        for executor in (self._probe_executor, self._upload_executor, self._ai_executor):
+        for executor in (self._probe_executor, self._upload_executor, self._ai_executor,
+                         self._export_executor):
             executor.shutdown(wait=False, cancel_futures=True)
         self.destroy()
 
@@ -1086,8 +1117,60 @@ class App(ctk.CTk):
         self._show_assessment()
         self._render_canvas()
 
+    # --- Report export -----------------------------------------------------------
     def on_export(self):
-        pass
+        """Ask for the case reference and notes, then where to save the PDF."""
+        if self.analysis is None or self.approved_at is None or self._exporting:
+            return  # only approved findings can be exported
+        ExportDialog(
+            self, on_save=self._save_report,
+            case_reference=self._report_case, notes=self._report_notes,
+        )
+
+    def _save_report(self, case_reference, notes):
+        # Keep what was typed so a second export starts from it.
+        self._report_case, self._report_notes = case_reference, notes
+        stem = _safe_filename(case_reference) or f"{self.approved_at:%Y-%m-%d_%H%M}"
+        path = filedialog.asksaveasfilename(
+            parent=self,
+            title="Save report",
+            initialdir=str(self._report_dir),
+            initialfile=f"OrthoScan_report_{stem}.pdf",
+            defaultextension=".pdf",
+            filetypes=[("PDF document", "*.pdf")],
+        )
+        if not path:
+            return  # save dialog cancelled
+        path = Path(path)
+        self._report_dir = path.parent
+        data = ReportData(
+            image=self.current_image,
+            analysis=self.analysis,
+            clinician=self.clinician,
+            approved_at=self.approved_at,
+            case_reference=case_reference,
+            notes=notes,
+            app_version=APP_VERSION,
+        )
+        self._exporting = True
+        self._report_message = None
+        self._show_assessment()
+        future = self._export_executor.submit(save_report_pdf, data, path)
+        self._poll_export(future, path, self._analysis_token)
+
+    def _poll_export(self, future, path, token):
+        if not future.done():
+            self.after(50, self._poll_export, future, path, token)
+            return
+        if token != self._analysis_token:
+            return  # new X-ray, Clear, or sign-out while saving: the old message is moot
+        self._exporting = False
+        try:
+            future.result()
+            self._report_message = (f"Report saved: {path.name}", False)
+        except Exception as exc:  # noqa: BLE001 - e.g. file open in a PDF viewer, no permission
+            self._report_message = (f"Couldn't save the report ({exc})", True)
+        self._show_assessment()
 
     def on_verify(self):
         """Clinician sign-off on the AI suggestions (in memory; nothing is saved yet)."""
@@ -1097,16 +1180,10 @@ class App(ctk.CTk):
         self._show_assessment()
 
 
-def _draw_dashed_rect(draw, box, color, width=2, dash=14, gap=10):
-    left, top, right, bottom = box
-    for x in range(left, right, dash + gap):
-        x_end = min(x + dash, right)
-        draw.line([(x, top), (x_end, top)], fill=color, width=width)
-        draw.line([(x, bottom), (x_end, bottom)], fill=color, width=width)
-    for y in range(top, bottom, dash + gap):
-        y_end = min(y + dash, bottom)
-        draw.line([(left, y), (left, y_end)], fill=color, width=width)
-        draw.line([(right, y), (right, y_end)], fill=color, width=width)
+def _safe_filename(text, limit=60):
+    """Case reference -> safe file-name part (letters, digits, dash, underscore)."""
+    cleaned = "".join(c if c.isalnum() or c in "-_" else "_" for c in text.strip())
+    return "_".join(part for part in cleaned.split("_") if part)[:limit]
 
 
 def _bind_click_tree(widget, handler):
@@ -1135,83 +1212,13 @@ def _plural(count, singular, plural=None):
     return f"{count} {singular if count == 1 else plural or singular + 's'}"
 
 
-_overlay_fonts = {}
-
-
-def _overlay_font(size):
-    if size not in _overlay_fonts:
-        try:
-            _overlay_fonts[size] = ImageFont.truetype("segoeuib.ttf", size)
-        except OSError:
-            _overlay_fonts[size] = ImageFont.load_default()
-    return _overlay_fonts[size]
-
-
-def _draw_analysis_overlay(image, analysis, scale, highlighted=frozenset()):
-    """AI boxes on a display copy, one colour per finding (see ASSESSMENT_CARDS swatches):
-    blue teeth, orange extra teeth, dashed violet gaps, thick red impacted teeth on top.
-
-    Findings not in `highlighted` are faded; an empty set highlights everything.
-    Returns a new RGB image.
-    """
-    impacted = analysis.impacted_numbers
-    extra = analysis.spacing.extra_numbers
-    # (finding, dashed, box, tag, colour, line width), in drawing order.
-    shapes = []
-    for tooth in analysis.teeth:
-        if tooth.label in impacted:
-            continue  # drawn in red below
-        is_extra = tooth.label in extra
-        shapes.append((
-            "crowding" if is_extra else "fdi", False, [c * scale for c in tooth.box],
-            tooth.label, CROWDING_BOX if is_extra else TOOTH_BOX, 2 if is_extra else 1,
-        ))
-    for space in analysis.spacing.spaces:
-        shapes.append((
-            "spacing", True, [round(c * scale) for c in space.box],
-            f"Space {', '.join(space.numbers)}", SPACING_BOX, 2,
-        ))
-    for item in analysis.impacted:
-        shapes.append((
-            "impacted", False, [c * scale for c in item.detection.box],
-            f"Impacted {item.fdi}" if item.fdi else "Impacted", DANGER, 3,
-        ))
-
-    def bright(finding):
-        return not highlighted or finding in highlighted
-
-    # Draw on a transparent layer, faded findings first so they never cover bright ones.
-    layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
-    draw = ImageDraw.Draw(layer)
-    font = _overlay_font(10)
-    for finding, dashed, box, tag, color, width in sorted(shapes, key=lambda s: bright(s[0])):
-        alpha = 255 if bright(finding) else DIMMED_ALPHA
-        rgba = (*ImageColor.getrgb(color), alpha)
-        if dashed:
-            _draw_dashed_rect(draw, box, rgba, width=width, dash=5, gap=3)
-        else:
-            draw.rectangle(box, outline=rgba, width=width)
-        _draw_tag(draw, box, tag, rgba, font, text_color=(*ImageColor.getrgb(BG_SIDEBAR), alpha))
-    return Image.alpha_composite(image.convert("RGBA"), layer).convert("RGB")
-
-
-def _draw_tag(draw, box, text, color, font, text_color=BG_SIDEBAR):
-    """Small filled label at a box's top-left corner (inside if there's no room above)."""
-    left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
-    width, height = right - left + 6, bottom - top + 4
-    x = box[0]
-    y = box[1] - height if box[1] - height >= 0 else box[1]
-    draw.rectangle([x, y, x + width, y + height], fill=color)
-    draw.text((x + 3 - left, y + 2 - top), text, fill=text_color, font=font)
-
-
 def _draw_framing_guide(image):
     """Dashed 2:1 box (panoramic X-ray shape) drawn onto a preview frame in place."""
     w, h = image.size
     guide_w = min(int(w * 0.88), int(h * 0.88) * 2)
     guide_h = guide_w // 2
     left, top = (w - guide_w) // 2, (h - guide_h) // 2
-    _draw_dashed_rect(
+    draw_dashed_rect(
         ImageDraw.Draw(image), (left, top, left + guide_w, top + guide_h), TEXT_PRIMARY
     )
 
