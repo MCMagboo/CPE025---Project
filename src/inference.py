@@ -139,7 +139,7 @@ class Analyzer:
         return AnalysisResult(
             teeth=sorted(teeth, key=lambda t: t.label),
             impacted=assign_fdi(impacted, teeth),
-            spacing=assess_spacing(teeth),
+            spacing=assess_spacing(teeth, image_width=rgb.width),
             timings_ms={
                 "numbering": (after_numbering - start) * 1000,
                 "impacted": (end - after_numbering) * 1000,

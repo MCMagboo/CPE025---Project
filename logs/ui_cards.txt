@@ -1,0 +1,537 @@
+      0.0s  === RUN START
+     13.1s  file picker OPEN
+     17.9s  file picker CLOSED after 4.8s (file chosen)
+     19.7s  analysis done (upload #1)
+     19.7s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=284/736 | ai status='AI suggestion — needs your review · analyzed in 0.5 s'
+     19.7s      [fdi] mapped=1 y=88 h=120 w=276
+     19.7s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     19.7s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     19.7s          text='● 32 of 32 teeth detected' inner='● 32 of 32 teeth detected' mapped=1 h=18 w=74 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     19.7s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     19.7s      [spacing] mapped=1 y=216 h=86 w=276
+     19.7s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     19.7s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     19.7s          text='● No missing teeth or spaces' inner='● No missing teeth or spaces' mapped=1 h=18 w=74 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     19.7s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     19.7s      [crowding] mapped=1 y=310 h=76 w=276
+     19.7s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     19.7s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     19.7s          text='● No extra teeth found' inner='● No extra teeth found' mapped=1 h=18 w=74 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     19.7s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     19.7s      [impacted] mapped=1 y=394 h=76 w=276
+     19.7s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     19.7s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     19.7s          text='● 4 impacted teeth: 48, 38, 18, 28' inner='● 4 impacted teeth: 48, 38, 18, 28' mapped=1 h=18 w=74 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     19.7s          text='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' inner='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s  --- SNAPSHOT: after analysis (+1 s) | window 1280x768 state=normal | panel need/has=582/736 | ai status='AI suggestion — needs your review · analyzed in 0.5 s'
+     20.7s      [fdi] mapped=1 y=90 h=120 w=276
+     20.7s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     20.7s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s          text='● 32 of 32 teeth detected' inner='● 32 of 32 teeth detected' mapped=1 h=18 w=144 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     20.7s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s      [spacing] mapped=1 y=218 h=86 w=276
+     20.7s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     20.7s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s          text='● No missing teeth or spaces' inner='● No missing teeth or spaces' mapped=1 h=18 w=158 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     20.7s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s      [crowding] mapped=1 y=312 h=76 w=276
+     20.7s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     20.7s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s          text='● No extra teeth found' inner='● No extra teeth found' mapped=1 h=18 w=129 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     20.7s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s      [impacted] mapped=1 y=396 h=100 w=276
+     20.7s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     20.7s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     20.7s          text='● 4 impacted teeth: 48, 38, 18, 28' inner='● 4 impacted teeth: 48, 38, 18, 28' mapped=1 h=18 w=186 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     20.7s          text='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' inner='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' mapped=1 h=16 w=227 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s  ANOMALY: fdi: mapped=0 y=90 h=120 w=276; spacing: mapped=0 y=218 h=86 w=276; crowding: mapped=0 y=312 h=76 w=276; impacted: mapped=0 y=396 h=100 w=276
+     36.1s  --- SNAPSHOT: anomaly | window 1280x768 state=iconic | panel need/has=582/736 | ai status='AI suggestion — needs your review · analyzed in 0.5 s'
+     36.1s      [fdi] mapped=0 y=90 h=120 w=276
+     36.1s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=0 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     36.1s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=0 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s          text='● 32 of 32 teeth detected' inner='● 32 of 32 teeth detected' mapped=0 h=18 w=144 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     36.1s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s      [spacing] mapped=0 y=218 h=86 w=276
+     36.1s          text='Spacing' inner='Spacing' mapped=0 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     36.1s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=0 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s          text='● No missing teeth or spaces' inner='● No missing teeth or spaces' mapped=0 h=18 w=158 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     36.1s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s      [crowding] mapped=0 y=312 h=76 w=276
+     36.1s          text='Overcrowding' inner='Overcrowding' mapped=0 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     36.1s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=0 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s          text='● No extra teeth found' inner='● No extra teeth found' mapped=0 h=18 w=129 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     36.1s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s      [impacted] mapped=0 y=396 h=100 w=276
+     36.1s          text='Impacted Tooth' inner='Impacted Tooth' mapped=0 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+     36.1s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=0 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+     36.1s          text='● 4 impacted teeth: 48, 38, 18, 28' inner='● 4 impacted teeth: 48, 38, 18, 28' mapped=0 h=18 w=186 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+     36.1s          text='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' inner='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' mapped=0 h=16 w=227 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    351.2s  anomaly cleared
+    353.2s  ANOMALY: fdi: mapped=0 y=90 h=120 w=276; spacing: mapped=0 y=218 h=86 w=276; crowding: mapped=0 y=312 h=76 w=276; impacted: mapped=0 y=396 h=100 w=276
+    353.2s  --- SNAPSHOT: anomaly | window 1280x768 state=iconic | panel need/has=582/736 | ai status='AI suggestion — needs your review · analyzed in 0.5 s'
+    353.2s      [fdi] mapped=0 y=90 h=120 w=276
+    353.2s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=0 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+    353.2s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=0 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    353.2s          text='● 32 of 32 teeth detected' inner='● 32 of 32 teeth detected' mapped=0 h=18 w=144 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+    353.2s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    353.2s      [spacing] mapped=0 y=218 h=86 w=276
+    353.2s          text='Spacing' inner='Spacing' mapped=0 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+    353.2s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=0 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    353.2s          text='● No missing teeth or spaces' inner='● No missing teeth or spaces' mapped=0 h=18 w=158 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+    353.2s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    353.2s      [crowding] mapped=0 y=312 h=76 w=276
+    353.2s          text='Overcrowding' inner='Overcrowding' mapped=0 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+    353.2s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=0 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    353.2s          text='● No extra teeth found' inner='● No extra teeth found' mapped=0 h=18 w=129 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+    353.2s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    353.2s      [impacted] mapped=0 y=396 h=100 w=276
+    353.2s          text='Impacted Tooth' inner='Impacted Tooth' mapped=0 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+    353.2s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=0 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+    353.2s          text='● 4 impacted teeth: 48, 38, 18, 28' inner='● 4 impacted teeth: 48, 38, 18, 28' mapped=0 h=18 w=186 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+    353.2s          text='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' inner='Confidence: 48 88%, 38 80%, 18 76%, 28 56%' mapped=0 h=16 w=227 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      0.0s  === RUN START
+      1.4s  file picker OPEN
+      1.4s  file picker CLOSED after 0.0s (file chosen)
+      1.5s  analysis done (upload #1)
+      1.5s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=204/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      1.5s      [fdi] mapped=1 y=88 h=120 w=276
+      1.5s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s      [spacing] mapped=1 y=216 h=86 w=276
+      1.5s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s      [crowding] mapped=1 y=310 h=76 w=276
+      1.5s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s      [impacted] mapped=1 y=394 h=76 w=276
+      1.5s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s  file picker OPEN
+      2.2s  file picker CLOSED after 0.0s (file chosen)
+      2.3s  analysis done (upload #2)
+      2.3s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=454/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      2.3s      [fdi] mapped=1 y=88 h=120 w=276
+      2.3s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.3s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.3s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=190 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.3s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.3s      [spacing] mapped=1 y=216 h=120 w=276
+      2.3s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.3s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.3s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.3s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.3s      [crowding] mapped=1 y=344 h=100 w=276
+      2.3s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.3s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.3s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=215 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.3s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.3s      [impacted] mapped=1 y=452 h=100 w=276
+      2.3s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.3s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.3s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.3s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s  --- SNAPSHOT: after analysis (+1 s) | window 1280x768 state=normal | panel need/has=640/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      2.5s      [fdi] mapped=1 y=90 h=120 w=276
+      2.5s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.5s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=190 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s      [spacing] mapped=1 y=218 h=120 w=276
+      2.5s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.5s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.5s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=1 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s      [crowding] mapped=1 y=346 h=100 w=276
+      2.5s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.5s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=215 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.5s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=1 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s      [impacted] mapped=1 y=454 h=100 w=276
+      2.5s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.5s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.5s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.5s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=1 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s  --- SNAPSHOT: after analysis (+1 s) | window 1280x768 state=normal | panel need/has=200/1 | ai status='Upload an X-ray or use the camera to start.'
+      3.5s      [fdi] mapped=0 y=0 h=1 w=1
+      3.5s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=0 h=1 w=1 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.5s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=0 h=1 w=1 wrap=0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s          text='● Waiting for an X-ray' inner='● Waiting for an X-ray' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -12 {bold roman  }
+      3.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s      [spacing] mapped=0 y=0 h=1 w=1
+      3.5s          text='Spacing' inner='Spacing' mapped=0 h=1 w=1 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.5s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=0 h=1 w=1 wrap=0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s          text='● Waiting for an X-ray' inner='● Waiting for an X-ray' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -12 {bold roman  }
+      3.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s      [crowding] mapped=0 y=0 h=1 w=1
+      3.5s          text='Overcrowding' inner='Overcrowding' mapped=0 h=1 w=1 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.5s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=0 h=1 w=1 wrap=0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s          text='● Waiting for an X-ray' inner='● Waiting for an X-ray' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -12 {bold roman  }
+      3.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s      [impacted] mapped=0 y=0 h=1 w=1
+      3.5s          text='Impacted Tooth' inner='Impacted Tooth' mapped=0 h=1 w=1 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.5s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=0 h=1 w=1 wrap=0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.5s          text='● Waiting for an X-ray' inner='● Waiting for an X-ray' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -12 {bold roman  }
+      3.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.8s  file picker OPEN
+      3.8s  file picker CLOSED after 0.0s (file chosen)
+      3.9s  analysis done (upload #3)
+      3.9s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=204/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      3.9s      [fdi] mapped=1 y=88 h=120 w=276
+      3.9s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.9s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.9s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      3.9s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.9s      [spacing] mapped=1 y=216 h=86 w=276
+      3.9s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.9s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.9s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      3.9s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.9s      [crowding] mapped=1 y=310 h=76 w=276
+      3.9s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.9s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.9s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      3.9s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.9s      [impacted] mapped=1 y=394 h=76 w=276
+      3.9s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      3.9s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.9s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      3.9s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.4s  file picker OPEN
+      4.4s  file picker CLOSED after 0.0s (file chosen)
+      4.5s  analysis done (upload #4)
+      4.5s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=454/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      4.5s      [fdi] mapped=1 y=88 h=120 w=276
+      4.5s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.5s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.5s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.5s      [spacing] mapped=1 y=216 h=86 w=276
+      4.5s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.5s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.5s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.5s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.5s      [crowding] mapped=1 y=310 h=76 w=276
+      4.5s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.5s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.5s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.5s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.5s      [impacted] mapped=1 y=394 h=76 w=276
+      4.5s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.5s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.5s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.5s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s  --- SNAPSHOT: after analysis (+1 s) | window 1024x768 state=normal | panel need/has=696/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      4.9s      [fdi] mapped=1 y=112 h=132 w=212
+      4.9s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.9s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=30 w=157 wrap=176.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.9s          text='' inner='' mapped=0 h=1 w=1 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s      [spacing] mapped=1 y=252 h=120 w=212
+      4.9s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.9s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=151 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=176.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.9s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=1 h=26 w=172 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s      [crowding] mapped=1 y=380 h=122 w=212
+      4.9s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.9s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=26 w=117 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=30 w=148 wrap=176.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.9s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=1 h=16 w=170 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s      [impacted] mapped=1 y=510 h=100 w=212
+      4.9s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      4.9s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.9s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=176.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      4.9s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=1 h=16 w=101 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.3s  === RUN END
+      0.0s  === RUN START
+      1.1s  file picker OPEN
+      1.1s  file picker CLOSED after 0.0s (file chosen)
+      1.2s  analysis done (upload #1)
+      1.2s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=509/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      1.2s      [fdi] mapped=1 y=88 h=120 w=276
+      1.2s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=0 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.2s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.2s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=0 h=1 w=1 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.2s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.2s      [spacing] mapped=1 y=216 h=86 w=276
+      1.2s          text='Spacing' inner='Spacing' mapped=0 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.2s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.2s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=0 h=1 w=1 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.2s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.2s      [crowding] mapped=1 y=310 h=76 w=276
+      1.2s          text='Overcrowding' inner='Overcrowding' mapped=0 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.2s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.2s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=0 h=1 w=1 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.2s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.2s      [impacted] mapped=1 y=394 h=76 w=276
+      1.2s          text='Impacted Tooth' inner='Impacted Tooth' mapped=0 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.2s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.2s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=0 h=1 w=1 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.2s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s  --- SNAPSHOT: after analysis (+1 s) | window 1280x768 state=normal | panel need/has=640/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      2.2s      [fdi] mapped=1 y=90 h=120 w=276
+      2.2s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.2s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=190 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.2s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s      [spacing] mapped=1 y=218 h=120 w=276
+      2.2s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.2s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.2s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=1 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s      [crowding] mapped=1 y=346 h=100 w=276
+      2.2s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.2s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=215 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.2s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=1 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s      [impacted] mapped=1 y=454 h=100 w=276
+      2.2s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.2s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.2s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      2.2s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=1 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      4.8s  === RUN END
+      0.0s  === RUN START
+      1.5s  file picker OPEN
+      1.5s  file picker CLOSED after 0.0s (file chosen)
+      1.6s  analysis done (upload #1)
+      1.6s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=204/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      1.6s      [fdi] mapped=1 y=88 h=120 w=276
+      1.6s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s      [spacing] mapped=1 y=216 h=86 w=276
+      1.6s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s      [crowding] mapped=1 y=310 h=76 w=276
+      1.6s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s      [impacted] mapped=1 y=394 h=76 w=276
+      1.6s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s  --- SNAPSHOT: after analysis (+1 s) | window 1024x768 state=normal | panel need/has=694/736 | ai status='✓ Approved by Dr. Ana Lee at 23:06'
+      2.6s      [fdi] mapped=1 y=110 h=132 w=212
+      2.6s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=30 w=157 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='' inner='' mapped=0 h=1 w=1 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s      [spacing] mapped=1 y=250 h=120 w=212
+      2.6s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=151 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=1 h=26 w=172 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s      [crowding] mapped=1 y=378 h=122 w=212
+      2.6s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=26 w=117 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=30 w=148 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=1 h=16 w=170 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s      [impacted] mapped=1 y=508 h=100 w=212
+      2.6s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=1 h=16 w=101 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.2s  === RUN END
+      0.0s  === RUN START
+      1.3s  file picker OPEN
+      1.3s  file picker CLOSED after 0.0s (file chosen)
+      1.4s  analysis done (upload #1)
+      1.4s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=204/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      1.4s      [fdi] mapped=1 y=88 h=120 w=276
+      1.4s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.4s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.4s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.4s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.4s      [spacing] mapped=1 y=216 h=86 w=276
+      1.4s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.4s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.4s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.4s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.4s      [crowding] mapped=1 y=310 h=76 w=276
+      1.4s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.4s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.4s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.4s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.4s      [impacted] mapped=1 y=394 h=76 w=276
+      1.4s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.4s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.4s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.4s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s  --- SNAPSHOT: after analysis (+1 s) | window 1280x768 state=normal | panel need/has=638/736 | ai status='✓ Approved by Dr. Ana Lee at 23:06'
+      2.4s      [fdi] mapped=1 y=88 h=120 w=276
+      2.4s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=190 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s      [spacing] mapped=1 y=216 h=120 w=276
+      2.4s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=1 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s      [crowding] mapped=1 y=344 h=100 w=276
+      2.4s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=215 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=1 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s      [impacted] mapped=1 y=452 h=100 w=276
+      2.4s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=1 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s  file picker OPEN
+      5.4s  file picker CLOSED after 0.0s (file chosen)
+      5.5s  analysis done (upload #2)
+      5.5s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=454/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      5.5s      [fdi] mapped=1 y=120 h=120 w=276
+      5.5s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.5s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.5s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=190 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.5s      [spacing] mapped=1 y=248 h=120 w=276
+      5.5s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.5s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.5s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.5s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.5s      [crowding] mapped=1 y=376 h=100 w=276
+      5.5s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.5s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.5s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=215 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.5s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.5s      [impacted] mapped=1 y=484 h=100 w=276
+      5.5s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.5s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.5s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.5s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.9s  === RUN END
+      0.0s  === RUN START
+      1.5s  file picker OPEN
+      1.5s  file picker CLOSED after 0.0s (file chosen)
+      1.6s  analysis done (upload #1)
+      1.6s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=204/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      1.6s      [fdi] mapped=1 y=88 h=120 w=276
+      1.6s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s      [spacing] mapped=1 y=216 h=86 w=276
+      1.6s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s      [crowding] mapped=1 y=310 h=76 w=276
+      1.6s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s      [impacted] mapped=1 y=394 h=76 w=276
+      1.6s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.6s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.6s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.6s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s  --- SNAPSHOT: after analysis (+1 s) | window 1024x768 state=normal | panel need/has=694/736 | ai status='✓ Approved by Dr. Ana Lee at 23:06'
+      2.6s      [fdi] mapped=1 y=110 h=132 w=212
+      2.6s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=30 w=157 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='' inner='' mapped=0 h=1 w=1 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s      [spacing] mapped=1 y=250 h=120 w=212
+      2.6s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=151 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=1 h=26 w=172 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s      [crowding] mapped=1 y=378 h=122 w=212
+      2.6s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=26 w=117 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=30 w=148 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=1 h=16 w=170 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s      [impacted] mapped=1 y=508 h=100 w=212
+      2.6s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.6s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.6s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=176.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.6s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=1 h=16 w=101 wrap=176.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      3.2s  === RUN END
+      0.0s  === RUN START
+      1.3s  file picker OPEN
+      1.3s  file picker CLOSED after 0.0s (file chosen)
+      1.4s  analysis done (upload #1)
+      1.5s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=204/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      1.5s      [fdi] mapped=1 y=88 h=120 w=276
+      1.5s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s      [spacing] mapped=1 y=216 h=86 w=276
+      1.5s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s      [crowding] mapped=1 y=310 h=76 w=276
+      1.5s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s      [impacted] mapped=1 y=394 h=76 w=276
+      1.5s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      1.5s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      1.5s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=122 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      1.5s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s  --- SNAPSHOT: after analysis (+1 s) | window 1280x768 state=normal | panel need/has=638/736 | ai status='✓ Approved by Dr. Ana Lee at 23:06'
+      2.4s      [fdi] mapped=1 y=88 h=120 w=276
+      2.4s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=190 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s      [spacing] mapped=1 y=216 h=120 w=276
+      2.4s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=1 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s      [crowding] mapped=1 y=344 h=100 w=276
+      2.4s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=215 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=1 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s      [impacted] mapped=1 y=452 h=100 w=276
+      2.4s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      2.4s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      2.4s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=240.0 fg=#2E9E6A font={Segoe UI} -12 {bold roman  }
+      2.4s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=1 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.3s  file picker OPEN
+      5.3s  file picker CLOSED after 0.0s (file chosen)
+      5.4s  analysis done (upload #2)
+      5.4s  --- SNAPSHOT: after analysis (idle) | window 1280x768 state=normal | panel need/has=454/736 | ai status='AI suggestion — needs your review · analyzed in 0.4 s'
+      5.4s      [fdi] mapped=1 y=120 h=120 w=276
+      5.4s          text='FDI Tooth Detection' inner='FDI Tooth Detection' mapped=1 h=20 w=132 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.4s          text='Tooth numbering (FDI notation)' inner='Tooth numbering (FDI notation)' mapped=1 h=16 w=164 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s          text='● 28 of 32 teeth detected, 1 extra' inner='● 28 of 32 teeth detected, 1 extra' mapped=1 h=18 w=190 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.4s          text='' inner='' mapped=0 h=1 w=1 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s      [spacing] mapped=1 y=248 h=120 w=276
+      5.4s          text='Spacing' inner='Spacing' mapped=1 h=20 w=53 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.4s          text='Missing teeth or spaces, from tooth numbering' inner='Missing teeth or spaces, from tooth numbering' mapped=1 h=26 w=183 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s          text='● 3 missing teeth or spaces' inner='● 3 missing teeth or spaces' mapped=1 h=18 w=149 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.4s          text='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' inner='Missing tooth or space: 11, 35, 45\nThird molar not detected: 28' mapped=0 h=26 w=172 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s      [crowding] mapped=1 y=376 h=100 w=276
+      5.4s          text='Overcrowding' inner='Overcrowding' mapped=1 h=20 w=96 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.4s          text='Extra teeth, from tooth numbering' inner='Extra teeth, from tooth numbering' mapped=1 h=16 w=177 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s          text='● Possible overcrowding: 1 extra tooth' inner='● Possible overcrowding: 1 extra tooth' mapped=1 h=18 w=215 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.4s          text='Extra tooth: 2 teeth numbered 12' inner='Extra tooth: 2 teeth numbered 12' mapped=0 h=16 w=170 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s      [impacted] mapped=1 y=484 h=100 w=276
+      5.4s          text='Impacted Tooth' inner='Impacted Tooth' mapped=1 h=20 w=106 wrap=0 fg=#EDEDED font={Segoe UI} -14 {bold roman  }
+      5.4s          text='Impacted tooth detection' inner='Impacted tooth detection' mapped=1 h=16 w=131 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.4s          text='● 1 impacted tooth: 38' inner='● 1 impacted tooth: 38' mapped=1 h=18 w=126 wrap=240.0 fg=#D4A017 font={Segoe UI} -12 {bold roman  }
+      5.4s          text='Confidence: 38 93%' inner='Confidence: 38 93%' mapped=0 h=16 w=101 wrap=240.0 fg=#8A8A8A font={Segoe UI} -11 {normal roman  }
+      5.8s  === RUN END
+    557.8s  anomaly cleared
+    560.5s  === RUN END

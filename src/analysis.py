@@ -112,7 +112,7 @@ def assign_fdi(impacted, teeth):
     return result
 
 
-def assess_spacing(teeth):
+def assess_spacing(teeth, image_width=None):
     """Overcrowding and missing teeth from the numbering (teeth already merged per spot)."""
     per_number = Counter(t.label for t in teeth)
     missing = [n for n in sorted(ALL_TEETH, key=int) if n not in per_number]
@@ -123,15 +123,18 @@ def assess_spacing(teeth):
         },
         missing=missing_spaces,
         third_molars_missing=[n for n in missing if n in THIRD_MOLARS],
-        spaces=spacing_regions(teeth, set(missing_spaces)),
+        spaces=spacing_regions(teeth, set(missing_spaces), image_width),
     )
 
 
-def spacing_regions(teeth, missing):
+def spacing_regions(teeth, missing, image_width=None):
     """Where each missing tooth should be: the gap between its nearest detected neighbours.
 
     Consecutive missing numbers in a jaw share one region. A group with no
-    detected tooth on one side (the end of the jaw) gets no region.
+    detected tooth on one side (the end of the jaw) gets an estimated region
+    beside its one neighbour, on the side away from the rest of the arch, one
+    median tooth width per missing tooth, kept inside the image when
+    `image_width` is given.
     """
     best = {}
     for tooth in teeth:  # a repeated number uses its most confident box
@@ -143,7 +146,8 @@ def spacing_regions(teeth, missing):
         present = [best[n] for n in arch if n in best]
         if not present:
             continue
-        min_width = median(t.box[2] - t.box[0] for t in present) * MIN_SPACE_WIDTH
+        tooth_width = median(t.box[2] - t.box[0] for t in present)
+        min_width = tooth_width * MIN_SPACE_WIDTH
         i = 0
         while i < len(arch):
             if arch[i] not in missing:
@@ -156,7 +160,13 @@ def spacing_regions(teeth, missing):
             before = next((best[n] for n in reversed(arch[:start]) if n in best), None)
             after = next((best[n] for n in arch[i:] if n in best), None)
             if before is not None and after is not None:
-                regions.append(SpacingRegion(group, _gap_box(before, after, min_width)))
+                box = _gap_box(before, after, min_width)
+            else:  # end of the jaw: extend away from the rest of the arch
+                neighbour = before or after
+                arch_middle = median((t.box[0] + t.box[2]) / 2 for t in present)
+                outward = 1 if (neighbour.box[0] + neighbour.box[2]) / 2 >= arch_middle else -1
+                box = _end_box(neighbour, len(group) * tooth_width, outward, image_width)
+            regions.append(SpacingRegion(group, box))
     return regions
 
 
@@ -169,3 +179,16 @@ def _gap_box(a, b, min_width):
     y1 = (left.box[1] + right.box[1]) / 2
     y2 = (left.box[3] + right.box[3]) / 2
     return (x1, y1, x2, y2)
+
+
+def _end_box(neighbour, width, outward, image_width=None):
+    """`width` wide beside `neighbour`: to its right if `outward` is 1, to its left if -1."""
+    x1, y1, x2, y2 = neighbour.box
+    if outward > 0:
+        left, right = x2, x2 + width
+    else:
+        left, right = x1 - width, x1
+    left = max(left, 0)
+    if image_width is not None:
+        right = min(right, image_width - 1)
+    return (left, y1, right, y2)

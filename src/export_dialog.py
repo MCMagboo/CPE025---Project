@@ -65,7 +65,7 @@ class ExportDialog(ctk.CTkToplevel):
         self.counter = label("", 7, muted=True, size=11, pady=(2, 16))
         self._update_counter()
 
-        buttons = ctk.CTkFrame(self, fg_color="transparent")
+        buttons = ctk.CTkFrame(self, fg_color="transparent", width=1, height=1)
         buttons.grid(row=8, column=0, padx=24, pady=(0, 20), sticky="e")
         ctk.CTkButton(
             buttons, text="Cancel", command=self.destroy, width=100, height=36, corner_radius=10,

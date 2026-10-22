@@ -52,41 +52,51 @@ def draw_analysis_overlay(image, analysis, scale, highlighted=frozenset(), tag_s
     blue teeth, orange extra teeth, dashed violet gaps, thick red impacted teeth on top.
 
     Findings not in `highlighted` are faded; an empty set highlights everything.
+    A box belongs to every finding it is part of: an impacted tooth with an FDI
+    number is also a numbered tooth, so highlighting FDI (without Impacted) draws
+    it as a bright blue tooth box; otherwise it is a red impacted box.
     `tag_size` / `line_scale` enlarge labels and lines (e.g. for a printed report).
     Returns a new RGB image.
     """
     impacted = analysis.impacted_numbers
     extra = analysis.spacing.extra_numbers
-    # (finding, dashed, box, tag, colour, line width), in drawing order.
+    # (findings, dashed, box, tag, colour, line width), in drawing order.
     shapes = []
     for tooth in analysis.teeth:
         if tooth.label in impacted:
             continue  # drawn in red below
         is_extra = tooth.label in extra
         shapes.append((
-            "crowding" if is_extra else "fdi", False, [c * scale for c in tooth.box],
+            {"crowding"} if is_extra else {"fdi"}, False, [c * scale for c in tooth.box],
             tooth.label, CROWDING_BOX if is_extra else TOOTH_BOX, 2 if is_extra else 1,
         ))
     for space in analysis.spacing.spaces:
         shapes.append((
-            "spacing", True, [round(c * scale) for c in space.box],
+            {"spacing"}, True, [round(c * scale) for c in space.box],
             f"Space {', '.join(space.numbers)}", SPACING_BOX, 2,
         ))
+    # Highlighting FDI without Impacted shows numbered impacted teeth as ordinary blue teeth.
+    as_tooth = "fdi" in highlighted and "impacted" not in highlighted
     for item in analysis.impacted:
+        box = [c * scale for c in item.detection.box]
+        if item.fdi and as_tooth:
+            shapes.append(({"fdi"}, False, box, item.fdi, TOOTH_BOX, 1))
+            continue
+        # Numbered impacted teeth count as FDI teeth too; unnumbered boxes don't.
         shapes.append((
-            "impacted", False, [c * scale for c in item.detection.box],
+            {"impacted", "fdi"} if item.fdi else {"impacted"}, False, box,
             f"Impacted {item.fdi}" if item.fdi else "Impacted", DANGER, 3,
         ))
 
-    def bright(finding):
-        return not highlighted or finding in highlighted
+    def bright(findings):
+        return not highlighted or bool(findings & set(highlighted))
 
     # Draw on a transparent layer, faded findings first so they never cover bright ones.
     layer = Image.new("RGBA", image.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
     tag_font = font(tag_size)
-    for finding, dashed, box, tag, color, width in sorted(shapes, key=lambda s: bright(s[0])):
-        alpha = 255 if bright(finding) else DIMMED_ALPHA
+    for findings, dashed, box, tag, color, width in sorted(shapes, key=lambda s: bright(s[0])):
+        alpha = 255 if bright(findings) else DIMMED_ALPHA
         rgba = (*ImageColor.getrgb(color), alpha)
         width *= line_scale
         if dashed:

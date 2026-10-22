@@ -92,7 +92,7 @@ class LoginView(ctk.CTkFrame):
     # --- Right: credentials form ---------------------------------------------
     def _build_form(self):
         # No sticky, so the form keeps its width and sits centered in the column.
-        form = self.form = ctk.CTkFrame(self, fg_color="transparent")
+        form = self.form = ctk.CTkFrame(self, fg_color="transparent", width=1, height=1)
         form.grid(row=0, column=1)
 
         if self._signup_mode and not self._has_accounts:
@@ -194,7 +194,7 @@ class LoginView(ctk.CTkFrame):
         else:
             question, link_text = "Don't have an account?", "Create one"
 
-        row = ctk.CTkFrame(form, fg_color="transparent")
+        row = ctk.CTkFrame(form, fg_color="transparent", width=1, height=1)
         row.pack(pady=(16, 0))
 
         ctk.CTkLabel(
