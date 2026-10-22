@@ -259,7 +259,7 @@ class App(ctk.CTk):
         self.canvas_frame.grid_columnconfigure(0, weight=1)
         self.canvas_frame.grid_rowconfigure(2, weight=1)  # the X-ray area
 
-        header = ctk.CTkFrame(self.canvas_frame, fg_color="transparent")
+        header = ctk.CTkFrame(self.canvas_frame, fg_color="transparent", width=1, height=1)
         header.grid(row=0, column=0, padx=20, pady=(16, 8), sticky="ew")
         header.grid_columnconfigure(1, weight=1)
 
@@ -284,7 +284,7 @@ class App(ctk.CTk):
 
         # Overlay controls, shown once AI results exist: which findings to highlight
         # (cards on the right toggle them; this chip resets to all) and the on/off switch.
-        bar = self.overlay_bar = ctk.CTkFrame(self.canvas_frame, fg_color="transparent")
+        bar = self.overlay_bar = ctk.CTkFrame(self.canvas_frame, fg_color="transparent", width=1, height=1)
         bar.grid(row=1, column=0, padx=20, pady=(0, 8), sticky="ew")
         bar.grid_columnconfigure(1, weight=1)
 
@@ -342,7 +342,9 @@ class App(ctk.CTk):
 
     def _build_camera_controls(self):
         """Row under the canvas, shown only while capturing from a camera."""
-        controls = self.camera_controls = ctk.CTkFrame(self.canvas_frame, fg_color="transparent")
+        controls = self.camera_controls = ctk.CTkFrame(
+            self.canvas_frame, fg_color="transparent", width=1, height=1
+        )
         controls.grid(row=3, column=0, padx=20, pady=(0, 16), sticky="ew")
         controls.grid_columnconfigure(1, weight=1)
 
@@ -590,14 +592,17 @@ class App(ctk.CTk):
 
     def _build_card(self, parent, title, subtitle, swatch):
         card = ctk.CTkFrame(
-            parent, fg_color=BG_CARD, corner_radius=10, border_width=1, border_color=BORDER
+            parent, fg_color=BG_CARD, corner_radius=10, border_width=1, border_color=BORDER,
+            # CTkFrame defaults to 200x200 and re-applies it on every redraw, which made
+            # cards briefly request ~450 px, squeezing the panel and clipping card text.
+            width=1, height=1,
         )
         card.grid_columnconfigure(0, weight=1)
 
         # Title with a swatch in the colour of this finding's boxes on the X-ray.
         # Labels get small minimum heights (CTk's default is 28 px each), so four
         # cards fit at 768 px tall; wrapped text still grows them as needed.
-        heading = ctk.CTkFrame(card, fg_color="transparent")
+        heading = ctk.CTkFrame(card, fg_color="transparent", width=1, height=1)
         heading.grid(row=0, column=0, padx=14, pady=(10, 0), sticky="w")
         ctk.CTkFrame(heading, width=10, height=10, corner_radius=2, fg_color=swatch).grid(
             row=0, column=0, padx=(0, 7)
@@ -653,7 +658,7 @@ class App(ctk.CTk):
 
     def _build_fdi_chart(self, card):
         """Dental chart: patient's right on the left, as on the X-ray. Upper jaw on top."""
-        chart = ctk.CTkFrame(card, fg_color="transparent")
+        chart = ctk.CTkFrame(card, fg_color="transparent", width=1, height=1)
         chart.grid(row=3, column=0, padx=14, pady=(0, 8), sticky="ew")
         self.fdi_cells = {}
         # Small enough that 16 numbers still fit at the minimum window width.
