@@ -15,7 +15,7 @@ import tkinter
 from tkinter import filedialog
 
 import customtkinter as ctk
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageDraw, ImageOps, ImageTk
 
 from analysis import LOWER_ARCH, UPPER_ARCH
 from auth import ClinicianStore
@@ -62,7 +62,9 @@ DROP_PROMPT = "Upload a 2D panoramic X-ray (DICOM, PNG, or JPEG) to begin."
 APP_VERSION = "v0.1.0"
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
-CAMERA_POLL_MS = 33  # ~30 fps live preview
+# Checked often so a 60 fps camera isn't held back; polls with no new frame do nothing.
+CAMERA_POLL_MS = 8
+CAMERA_HINT = "Fit the X-ray inside the dashed frame."
 NO_CAMERA_MESSAGE = (
     "No camera found. Connect a webcam, and check that Settings › Privacy & security "
     "› Camera allows desktop apps."
@@ -124,6 +126,9 @@ class App(ctk.CTk):
         self._camera_job = None
         self._camera_message = None
         self._last_frame_count = None
+        self._live_photo = None  # Tk image the live preview is pasted into
+        self._live_base = None  # (key, background the preview is pasted onto)
+        self._fps_shown = None
         self._found_cameras = None
         self._probe_future = None
         self._probe_executor = ThreadPoolExecutor(max_workers=1)
@@ -368,7 +373,7 @@ class App(ctk.CTk):
 
         self.camera_hint = ctk.CTkLabel(
             controls,
-            text="Fit the X-ray inside the dashed frame.",
+            text=CAMERA_HINT,
             font=ctk.CTkFont(family=FONT_FAMILY, size=12),
             text_color=TEXT_MUTED,
             anchor="w",
@@ -422,6 +427,8 @@ class App(ctk.CTk):
         # Wrap status/error messages inside the drop zone instead of stretching it.
         width, _ = self._canvas_logical_size(event.width, event.height)
         self.image_label.configure(wraplength=max(width - 80, 200))
+        if self.camera is not None:
+            self.camera.set_preview_size(self._canvas_screen_size())
         if self._resize_job is not None:
             self.after_cancel(self._resize_job)
         self._resize_job = self.after(80, self._render_canvas)
@@ -454,7 +461,13 @@ class App(ctk.CTk):
         scale = self.image_label._get_widget_scaling()
         return max(int(width / scale), 50), max(int(height / scale), 50)
 
-    def _show_on_canvas(self, image, guide=False, analysis=None, highlighted=frozenset()):
+    def _canvas_screen_size(self):
+        """Canvas size in screen pixels, rounded the way CTkImage scales the logical size."""
+        w, h = self._canvas_logical_size(*self._canvas_size)
+        scale = self.image_label._get_widget_scaling()
+        return int(w * scale), int(h * scale)
+
+    def _show_on_canvas(self, image, analysis=None, highlighted=frozenset()):
         """Fit `image` into the canvas without stretching, on the drop-zone background.
 
         With `analysis`, AI boxes are drawn on the fitted copy (never on `image`);
@@ -466,17 +479,13 @@ class App(ctk.CTk):
         ImageDraw.Draw(background).rounded_rectangle(
             [0, 0, w - 1, h - 1], radius=12, fill=BG_PLACEHOLDER
         )
-        if guide:  # live camera frame: new every time, never cached
-            fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
-            _draw_framing_guide(fitted)
+        # Reuse the resized X-ray when only the overlay changes (highlight clicks).
+        cached = self._fitted_cache
+        if cached and cached[0] is image and cached[1] == (w, h):
+            fitted = cached[2]
         else:
-            # Reuse the resized X-ray when only the overlay changes (highlight clicks).
-            cached = self._fitted_cache
-            if cached and cached[0] is image and cached[1] == (w, h):
-                fitted = cached[2]
-            else:
-                fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
-                self._fitted_cache = (image, (w, h), fitted)
+            fitted = ImageOps.contain(image, (w, h), method=Image.Resampling.BILINEAR)
+            self._fitted_cache = (image, (w, h), fitted)
         if analysis is not None:
             fitted = draw_analysis_overlay(
                 fitted, analysis, scale=fitted.width / image.width, highlighted=highlighted
@@ -485,6 +494,40 @@ class App(ctk.CTk):
 
         self.canvas_image = ctk.CTkImage(light_image=background, dark_image=background, size=(w, h))
         self.image_label.configure(image=self.canvas_image, text="")
+        self._live_photo = None  # CTk replaced it; the next live frame re-attaches one
+
+    def _show_live_frame(self, rgb):
+        """Draw one camera preview frame (RGB array already fitted to the screen size).
+
+        Bypasses CTkImage, which resizes the image and builds a new Tk image on
+        every update - too slow for 60 fps. Instead one Tk image at screen size
+        is reused and its pixels replaced in place.
+        """
+        w, h = self._canvas_screen_size()
+        frame_h, frame_w = rgb.shape[:2]
+        if frame_w > w or frame_h > h:
+            return  # made for the size before a resize; a fitted one is on its way
+        scale = self.image_label._get_widget_scaling()
+        key = ((w, h), (frame_w, frame_h))
+        if self._live_base is None or self._live_base[0] != key:
+            background = Image.new("RGB", (w, h), BG_SURFACE)
+            ImageDraw.Draw(background).rounded_rectangle(
+                [0, 0, w - 1, h - 1], radius=round(12 * scale), fill=BG_PLACEHOLDER
+            )
+            self._live_base = (key, background)
+            self._live_photo = None
+        background = self._live_base[1]
+
+        frame = Image.fromarray(rgb)
+        _draw_framing_guide(frame, scale)
+        # Every frame covers the same spot, so pasting in place needs no fresh copy.
+        background.paste(frame, ((w - frame_w) // 2, (h - frame_h) // 2))
+
+        if self._live_photo is None:
+            self._live_photo = ImageTk.PhotoImage(background)
+            self.image_label._label.configure(image=self._live_photo, text="")
+        else:
+            self._live_photo.paste(background)
 
     def _show_canvas_message(self, message):
         """Empty drop zone with a status or error message in place of the prompt."""
@@ -513,6 +556,7 @@ class App(ctk.CTk):
 
         self.placeholder_image = ctk.CTkImage(light_image=img, dark_image=img, size=(w, h))
         self.image_label.configure(image=self.placeholder_image, text=DROP_PROMPT)
+        self._live_photo = None  # CTk replaced it; the next live frame re-attaches one
 
     # --- Right column: analysis & verification -------------------------------
     def _build_analysis_panel(self):
@@ -950,9 +994,13 @@ class App(ctk.CTk):
     def _start_camera(self, index):
         self._stop_camera()
         self.camera = CameraStream(index)
+        if self._canvas_size is not None:
+            self.camera.set_preview_size(self._canvas_screen_size())
         self.camera.start()
         self._camera_message = None
         self._last_frame_count = None
+        self._fps_shown = None
+        self.camera_hint.configure(text=CAMERA_HINT)
         self.capture_button.configure(state="disabled")
         if self._camera_job is None:
             self._poll_camera()
@@ -972,6 +1020,7 @@ class App(ctk.CTk):
             return
         self.camera_mode = None
         self.captured_image = None
+        self._live_base = None
         self.camera_button.configure(text="Open Camera")
         self._show_camera_controls(None)
         self._render_canvas()
@@ -997,11 +1046,18 @@ class App(ctk.CTk):
         elif camera.state == CameraStream.STARTING or camera.frame_count == 0:
             self._set_camera_message(f"Starting {camera.name}…")
         elif camera.frame_count != self._last_frame_count and self._canvas_size is not None:
-            self._last_frame_count = camera.frame_count
-            self._camera_message = None
-            w, h = self._canvas_logical_size(*self._canvas_size)
-            self._show_on_canvas(camera.latest_frame(max_size=(w, h)), guide=True)
-            self.capture_button.configure(state="normal")
+            preview = camera.latest_preview()
+            if preview is not None:
+                self._last_frame_count = camera.frame_count
+                self._camera_message = None
+                self._show_live_frame(preview)
+                # Only when it changes: every CTk configure redraws the widget.
+                if self.capture_button.cget("state") == "disabled":
+                    self.capture_button.configure(state="normal")
+                fps = round(camera.fps)
+                if fps and fps != self._fps_shown:
+                    self._fps_shown = fps
+                    self.camera_hint.configure(text=f"{CAMERA_HINT[:-1]} · {fps} fps")
 
         self._camera_job = self.after(CAMERA_POLL_MS, self._poll_camera)
 
@@ -1217,14 +1273,18 @@ def _plural(count, singular, plural=None):
     return f"{count} {singular if count == 1 else plural or singular + 's'}"
 
 
-def _draw_framing_guide(image):
-    """Dashed 2:1 box (panoramic X-ray shape) drawn onto a preview frame in place."""
+def _draw_framing_guide(image, scale=1.0):
+    """Dashed 2:1 box (panoramic X-ray shape) drawn onto a preview frame in place.
+
+    `scale` is the display scaling, so lines look the same at any DPI.
+    """
     w, h = image.size
     guide_w = min(int(w * 0.88), int(h * 0.88) * 2)
     guide_h = guide_w // 2
     left, top = (w - guide_w) // 2, (h - guide_h) // 2
     draw_dashed_rect(
-        ImageDraw.Draw(image), (left, top, left + guide_w, top + guide_h), TEXT_PRIMARY
+        ImageDraw.Draw(image), (left, top, left + guide_w, top + guide_h), TEXT_PRIMARY,
+        width=max(round(2 * scale), 1), dash=round(14 * scale), gap=round(10 * scale),
     )
 
 
