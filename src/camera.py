@@ -11,8 +11,12 @@ import time
 import cv2
 from PIL import Image
 
-# Sharper for reading a printed X-ray; cameras fall back to what they support.
-REQUESTED_SIZE = (1920, 1080)
+# 720p, because most webcams only reach 60 fps at this size (1080p usually tops
+# out at 30). Cameras fall back to the nearest mode they support.
+REQUESTED_SIZE = (1280, 720)
+REQUESTED_FPS = 60
+# Smoothing for the measured frame rate (closer to 1 = steadier readout).
+FPS_SMOOTHING = 0.95
 # Consecutive failed reads (about 1.5 s) before the camera counts as lost.
 MAX_READ_FAILURES = 30
 
@@ -42,7 +46,10 @@ class CameraStream:
         self.error = None
         self.frame_size = None
         self.frame_count = 0
+        self.fps = 0.0  # measured frames per second, 0 until two frames arrive
         self._frame = None  # newest BGR frame from OpenCV
+        self._preview = None  # newest frame fitted to _preview_size, as RGB
+        self._preview_size = None  # (w, h) in screen pixels, set by the UI
         self._lock = threading.Lock()
         self._stop = threading.Event()
         self._thread = None
@@ -75,22 +82,25 @@ class CameraStream:
         if self.state != self.FAILED:
             self.state = self.STOPPED
 
-    def latest_frame(self, max_size=None):
-        """Newest frame as an RGB PIL image, or None if there isn't one yet.
+    def set_preview_size(self, size):
+        """Fit future previews into `size` (w, h); None stops making previews."""
+        self._preview_size = size
 
-        With `max_size=(w, h)`, the frame is shrunk to fit first, which is much
-        cheaper than converting the full-resolution frame for a live preview.
+    def latest_preview(self):
+        """Newest frame fitted to the preview size, as an RGB numpy array, or None.
+
+        Resizing and colour conversion happen on the reader thread, so the UI
+        thread only has to display it.
         """
+        with self._lock:
+            return self._preview
+
+    def latest_frame(self):
+        """Newest full-resolution frame as an RGB PIL image, or None if there isn't one yet."""
         with self._lock:
             frame = self._frame
         if frame is None:
             return None
-        if max_size is not None:
-            h, w = frame.shape[:2]
-            ratio = min(max_size[0] / w, max_size[1] / h, 1.0)
-            if ratio < 1.0:
-                size = (max(int(w * ratio), 1), max(int(h * ratio), 1))
-                frame = cv2.resize(frame, size, interpolation=cv2.INTER_AREA)
         return Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
     def _run(self):
@@ -102,12 +112,16 @@ class CameraStream:
                     "(Teams, Zoom, Camera), or pick another camera."
                 )
                 return
-            # Uncompressed 1080p is too much for USB (~4 fps); MJPG keeps it smooth.
-            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+            # Size first, then MJPG: on DirectShow, setting the size after the format
+            # can drop back to uncompressed YUY2, which USB can't carry at 60 fps.
             cap.set(cv2.CAP_PROP_FRAME_WIDTH, REQUESTED_SIZE[0])
             cap.set(cv2.CAP_PROP_FRAME_HEIGHT, REQUESTED_SIZE[1])
+            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+            cap.set(cv2.CAP_PROP_FPS, REQUESTED_FPS)
 
             failures = 0
+            interval = None  # smoothed seconds between frames
+            last_time = None
             while not self._stop.is_set():
                 ok, frame = cap.read()
                 if not ok or frame is None:
@@ -121,8 +135,19 @@ class CameraStream:
                     time.sleep(0.05)
                     continue
                 failures = 0
+                now = time.perf_counter()
+                if last_time is not None:
+                    gap = now - last_time
+                    interval = gap if interval is None else (
+                        FPS_SMOOTHING * interval + (1 - FPS_SMOOTHING) * gap
+                    )
+                    self.fps = 1 / interval if interval > 0 else 0.0
+                last_time = now
+
+                preview = _fit_rgb(frame, self._preview_size)
                 with self._lock:
                     self._frame = frame
+                    self._preview = preview
                     self.frame_count += 1
                 if self.state == self.STARTING:
                     self.frame_size = (frame.shape[1], frame.shape[0])
@@ -133,6 +158,19 @@ class CameraStream:
     def _fail(self, message):
         self.error = message
         self.state = self.FAILED
+
+
+def _fit_rgb(frame, size):
+    """BGR frame scaled to fit `size` (w, h) without stretching, as RGB; None if no size."""
+    if size is None:
+        return None
+    h, w = frame.shape[:2]
+    ratio = min(size[0] / w, size[1] / h)
+    if ratio != 1.0:
+        scaled = (max(int(w * ratio), 1), max(int(h * ratio), 1))
+        interpolation = cv2.INTER_AREA if ratio < 1.0 else cv2.INTER_LINEAR
+        frame = cv2.resize(frame, scaled, interpolation=interpolation)
+    return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
 
 def camera_name(index):
