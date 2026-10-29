@@ -4,6 +4,11 @@ render_report() lays out an A4 page as an image; save_report_pdf() writes it
 as a PDF. Light colours, so it prints well. Only call these after the
 clinician has approved the findings (HITL): the report states who approved
 them and when.
+
+The sections follow the order of the ACR Practice Parameter for Communication
+of Diagnostic Imaging Findings: demographics, clinical information, procedure
+(with comparison), findings, limitations, impression, then the signed and
+dated verification.
 """
 
 import os
@@ -30,10 +35,13 @@ RULE = "#C9C9C9"
 PANEL = "#F3F4F6"
 FAINT = "#BDBDBD"  # missing third molar on the chart
 
-DISCLAIMER = (
+EXAMINATION = "Panoramic dental radiograph (OPG)"
+CLINICAL_INFO = "Orthodontic assessment: tooth numbering, spacing, overcrowding and impacted teeth."
+LIMITATIONS = (
     "Decision support only. Findings are AI suggestions reviewed and approved by the clinician "
-    "named above; they are not a diagnosis. Spacing and overcrowding are derived from tooth "
-    "numbering (missing or repeated FDI numbers), not from measurements."
+    "named below; they are not a diagnosis. Spacing and overcrowding are derived from tooth "
+    "numbering (missing or repeated FDI numbers), not from measurements. Third molars are "
+    "listed separately and not counted as spacing."
 )
 
 
@@ -62,40 +70,50 @@ def save_report_pdf(data, path):
 def render_report(data):
     page = Image.new("RGB", (PAGE_W, PAGE_H), "white")
     draw = ImageDraw.Draw(page)
+    result = data.analysis
+    spacing = result.spacing
     y = MARGIN
 
-    # --- Header ------------------------------------------------------------------
-    draw.text((MARGIN, y), "OrthoScan AI — Orthodontic Assessment Report", font=font(34), fill=INK)
-    y += 50
-    draw.text((MARGIN, y), "AI-assisted assessment — clinician verified", font=font(18, bold=False), fill=MUTED)
-    y += 40
-    case = data.case_reference.strip() or "—"
+    # --- Title -------------------------------------------------------------------------------
+    draw.text((MARGIN, y), "Orthodontic Assessment Report — Panoramic Radiograph", font=font(32), fill=INK)
+    y += 46
+    draw.text((MARGIN, y), "OrthoScan AI · AI-assisted, clinician verified", font=font(17, bold=False), fill=MUTED)
+    y += 36
+
+    # --- 1. Patient and examination (demographics) -----------------------------------------
+    y = _heading(draw, y, "1. Patient and examination")
     meta = [
-        ("Case reference", case),
+        ("Case reference", data.case_reference.strip() or "—"),
+        ("Examination", EXAMINATION),
         ("Report date", f"{data.generated_at:%d %b %Y, %H:%M}"),
-        ("X-ray", f"{data.image.width} × {data.image.height} px"),
-        ("Analysis time", f"{data.analysis.timings_ms.get('total', 0) / 1000:.1f} s"),
     ]
     col_w = CONTENT_W // len(meta)
     for i, (label, value) in enumerate(meta):
         x = MARGIN + i * col_w
         draw.text((x, y), label, font=font(14, bold=False), fill=MUTED)
-        draw.text((x, y + 20), _fit(draw, value, font(18), col_w - 16), font=font(18), fill=INK)
-    y += 58
-    draw.line([(MARGIN, y), (PAGE_W - MARGIN, y)], fill=RULE, width=2)
-    y += 22
+        draw.text((x, y + 20), _fit(draw, value, font(17), col_w - 16), font=font(17), fill=INK)
+    y += 56
 
-    # --- X-ray with findings -----------------------------------------------------------
-    y = _draw_xray(page, draw, data, y, max_h=520)
-    y = _draw_legend(draw, y + 12)
-    y += 22
+    # --- 2. Clinical information ------------------------------------------------------------
+    y = _heading(draw, y, "2. Clinical information")
+    y = _text_block(draw, MARGIN, y, CLINICAL_INFO, CONTENT_W) + 8
 
-    # --- Findings, two columns ----------------------------------------------------------
+    # --- 3. Procedure (with comparison) -------------------------------------------------------
+    y = _heading(draw, y, "3. Procedure")
+    y = _text_block(draw, MARGIN, y, (
+        f"X-ray {data.image.width} × {data.image.height} px, analysed in "
+        f"{result.timings_ms.get('total', 0) / 1000:.1f} s by {NUMBERING_MODEL.name} (tooth numbering, "
+        f"YOLOv8) and {IMPACTED_MODEL.name} (impacted teeth, EfficientDet). "
+        "Comparison: no prior examinations available."), CONTENT_W) + 8
+
+    # --- 4. Findings, two columns -----------------------------------------------------------
+    y = _heading(draw, y, "4. Findings")
+    y = _draw_xray(page, draw, data, y, max_h=400)
+    y = _draw_legend(draw, y + 10)
+    y += 18
     gap = 40
     col_w = (CONTENT_W - gap) // 2
     left_x, right_x = MARGIN, MARGIN + col_w + gap
-    result = data.analysis
-    spacing = result.spacing
 
     yl = _section_title(draw, left_x, y, "FDI Tooth Detection", TOOTH_BOX, col_w)
     status = f"{len(result.detected_numbers)} of 32 teeth detected"
@@ -104,15 +122,16 @@ def render_report(data):
     yl = _text_block(draw, left_x, yl, status, col_w, bold=True)
     yl = _draw_chart(draw, left_x, yl + 6, col_w, result) + 14
 
-    yl = _section_title(draw, left_x, yl, "Spacing — missing teeth or spaces", SPACING_BOX, col_w)
-    yl = _text_block(draw, left_x, yl, _plural(len(spacing.missing), "missing tooth or space",
-                     "missing teeth or spaces") if spacing.missing else "No missing teeth or spaces",
-                     col_w, bold=True)
-    if spacing.missing:
-        yl = _text_block(draw, left_x, yl, f"Missing tooth or space: {', '.join(spacing.missing)}", col_w)
-    if spacing.third_molars_missing:
-        yl = _text_block(draw, left_x, yl,
-                         f"Third molar not detected: {', '.join(spacing.third_molars_missing)}", col_w)
+    yl = _section_title(draw, left_x, yl, "Impacted Tooth", DANGER, col_w)
+    if result.impacted:
+        numbers = [i.fdi or "unnumbered" for i in result.impacted]
+        yl = _text_block(draw, left_x, yl, f"{_plural(len(numbers), 'impacted tooth', 'impacted teeth')}: "
+                         f"{', '.join(numbers)}", col_w, bold=True)
+        for item in result.impacted:
+            yl = _text_block(draw, left_x, yl,
+                             f"{item.fdi or 'Unnumbered'} — {item.detection.score:.0%} confidence", col_w)
+    else:
+        yl = _text_block(draw, left_x, yl, "No impacted teeth found", col_w, bold=True)
 
     yr = _section_title(draw, right_x, y, "Overcrowding — extra teeth (possible supernumerary)",
                         CROWDING_BOX, col_w)
@@ -125,47 +144,72 @@ def render_report(data):
         yr = _text_block(draw, right_x, yr, "No extra teeth found", col_w, bold=True)
     yr += 14
 
-    yr = _section_title(draw, right_x, yr, "Impacted Tooth", DANGER, col_w)
-    if result.impacted:
-        numbers = [i.fdi or "unnumbered" for i in result.impacted]
-        yr = _text_block(draw, right_x, yr, f"{_plural(len(numbers), 'impacted tooth', 'impacted teeth')}: "
-                         f"{', '.join(numbers)}", col_w, bold=True)
-        for item in result.impacted:
-            yr = _text_block(draw, right_x, yr,
-                             f"{item.fdi or 'Unnumbered'} — {item.detection.score:.0%} confidence", col_w)
-    else:
-        yr = _text_block(draw, right_x, yr, "No impacted teeth found", col_w, bold=True)
+    yr = _section_title(draw, right_x, yr, "Spacing — missing teeth or spaces", SPACING_BOX, col_w)
+    yr = _text_block(draw, right_x, yr, _plural(len(spacing.missing), "missing tooth or space",
+                     "missing teeth or spaces") if spacing.missing else "No missing teeth or spaces",
+                     col_w, bold=True)
+    if spacing.missing:
+        yr = _text_block(draw, right_x, yr, f"Missing tooth or space: {', '.join(spacing.missing)}", col_w)
+    if spacing.third_molars_missing:
+        yr = _text_block(draw, right_x, yr,
+                         f"Third molar not detected: {', '.join(spacing.third_molars_missing)}", col_w)
+    y = max(yl, yr) + 12
 
-    y = max(yl, yr) + 20
-    draw.line([(MARGIN, y), (PAGE_W - MARGIN, y)], fill=RULE, width=2)
-    y += 20
+    # --- 5. Limitations -----------------------------------------------------------------------
+    y = _heading(draw, y, "5. Limitations")
+    y = _text_block(draw, MARGIN, y, LIMITATIONS, CONTENT_W, size=15, color=MUTED) + 8
 
-    # --- Clinician verification and notes -------------------------------------------------
-    footer_top = PAGE_H - MARGIN - 110
-    draw.text((MARGIN, y), "Clinician verification", font=font(22), fill=INK)
-    y += 34
-    y = _text_block(draw, MARGIN, y, f"Verified and approved by {data.clinician} on "
-                    f"{data.approved_at:%d %b %Y} at {data.approved_at:%H:%M}", CONTENT_W, bold=True)
-    y += 10
+    # --- 6. Impression: summary (most important first), then the clinician's notes ----------
+    footer_top = PAGE_H - MARGIN - 64
+    y = _heading(draw, y, "6. Impression")
+    y = _text_block(draw, MARGIN, y, _impression(result), CONTENT_W, bold=True) + 6
     draw.text((MARGIN, y), "Clinician notes", font=font(16), fill=MUTED)
     y += 26
-    box_bottom = footer_top - 20
+    box_bottom = footer_top - 18
     draw.rounded_rectangle([MARGIN, y, PAGE_W - MARGIN, box_bottom], radius=10, fill=PANEL, outline=RULE, width=2)
     notes = data.notes.strip() or "No notes."
     _notes_in_box(draw, notes, MARGIN + 18, y + 14, CONTENT_W - 36, box_bottom - 14)
 
-    # --- Footer --------------------------------------------------------------------------
+    # --- 7. Verification (signed and dated) -----------------------------------------------------
     y = footer_top
     draw.line([(MARGIN, y), (PAGE_W - MARGIN, y)], fill=RULE, width=1)
     y += 12
-    y = _text_block(draw, MARGIN, y, DISCLAIMER, CONTENT_W, size=14, color=MUTED)
-    details = (f"Models: {NUMBERING_MODEL.name} (tooth numbering, YOLOv8), {IMPACTED_MODEL.name} "
-               f"(impacted teeth, EfficientDet) · OrthoScan AI {data.app_version}".rstrip())
-    _text_block(draw, MARGIN, y + 4, details, CONTENT_W, size=13, color=MUTED)
+    y = _text_block(draw, MARGIN, y, f"Verified and approved by {data.clinician} on "
+                    f"{data.approved_at:%d %b %Y} at {data.approved_at:%H:%M}", CONTENT_W, bold=True)
+    _text_block(draw, MARGIN, y, f"OrthoScan AI {data.app_version}".rstrip(), CONTENT_W, size=13, color=MUTED)
     return page
 
 
+def _impression(result):
+    """One-line summary of the findings, most important first."""
+    spacing = result.spacing
+    parts = [f"{len(result.detected_numbers)} of 32 teeth detected"]
+    if result.impacted:
+        numbers = ", ".join(i.fdi or "unnumbered" for i in result.impacted)
+        parts.append(f"{_plural(len(result.impacted), 'impacted tooth', 'impacted teeth')} ({numbers})")
+    else:
+        parts.append("no impacted teeth")
+    if spacing.has_overcrowding:
+        parts.append(f"possible overcrowding, {_plural(spacing.extra_teeth, 'extra tooth', 'extra teeth')}")
+    else:
+        parts.append("no extra teeth")
+    if spacing.missing:
+        parts.append(f"{_plural(len(spacing.missing), 'missing tooth or space', 'missing teeth or spaces')} "
+                     f"({', '.join(spacing.missing)})")
+    else:
+        parts.append("no missing teeth or spaces")
+    return "; ".join(parts) + "."
+
+
 # --- Layout helpers -----------------------------------------------------------------------
+def _heading(draw, y, text):
+    """Numbered report section heading with a rule under it."""
+    draw.text((MARGIN, y), text, font=font(19), fill=INK)
+    y += 28
+    draw.line([(MARGIN, y), (PAGE_W - MARGIN, y)], fill=RULE, width=1)
+    return y + 10
+
+
 def _draw_xray(page, draw, data, y, max_h):
     """The X-ray with every finding drawn at full colour, centred."""
     fitted = ImageOps.contain(data.image.convert("RGB"), (CONTENT_W, max_h), method=Image.Resampling.LANCZOS)

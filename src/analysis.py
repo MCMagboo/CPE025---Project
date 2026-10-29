@@ -54,7 +54,7 @@ class SpacingAssessment:
     extra_numbers: dict
     missing: list  # numbers with no tooth (missing tooth or space), third molars excluded
     third_molars_missing: list  # 18/28/38/48 with no tooth; often absent naturally
-    spaces: list = field(default_factory=list)  # SpacingRegion per gap that has teeth on both sides
+    spaces: list = field(default_factory=list)  # SpacingRegion per group of consecutive missing numbers
 
     @property
     def extra_teeth(self):
